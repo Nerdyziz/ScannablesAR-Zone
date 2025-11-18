@@ -32,13 +32,17 @@ export default function ModelViewer({ modelUrl }) {
         auto-rotate
         auto-rotate-delay="0"
         
-        /* FIXED: Removed strict 90deg lock and disable-pan. 
-           These settings often make the model invisible on mobile 
-           because the Viewport clips the fixed angle. */
-        
+        /* ROTATION SETTINGS */
         rotation-per-second="-60deg"
+        
+        /* Removed the strict 90deg lock so mobile users can see the whole model */
+        /* min-camera-orbit="auto 90deg auto" */
+        /* max-camera-orbit="auto 90deg auto" */
+        
+        /* Keeps panning disabled as requested */
+        disable-pan 
+
         shadow-intensity="1"
-        touch-action="pan-y" 
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
       >
         {/* Custom Progress Bar */}

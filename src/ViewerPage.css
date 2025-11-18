@@ -7,22 +7,23 @@
 .raw-link{ color:#7dd3fc; text-decoration:none; background: rgba(255,255,255,0.02); padding:6px 10px; border-radius:8px; }
 
 .viewer-main { display:flex; gap:18px; padding:22px; align-items:flex-start; }
-.viewer-left{ flex:1; width: 100%; /* Ensure width on mobile */ }
+.viewer-left{ flex:1; width: 100%; /* Fix: Ensures width exists on mobile */ }
 
-/* FIXED: Changed display to flex to ensure internal centering works */
-.viewer-card{ 
+/* --- CRITICAL FIX HERE --- */
+.viewer-card { 
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); 
-  border-radius:12px; 
-  padding:0px; 
-  height:70vh; 
-  display:flex; /* Changed from block */
-  flex-direction: column; /* Ensure child fills correctly */
-  align-items:center; 
-  justify-content:center; 
-  border:1px solid rgba(255,255,255,0.03); 
+  border-radius: 12px; 
+  padding: 0px; 
+  height: 70vh; 
+  /* Changed from block to flex to center the canvas properly */
+  display: flex; 
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center; 
+  border: 1px solid rgba(255,255,255,0.03); 
   box-shadow: 0 12px 40px rgba(2,6,23,0.6); 
   overflow: hidden; 
-  position: relative; /* specific context */
+  position: relative;
 }
 
 .viewer-sidebar{ width:320px; }
@@ -40,9 +41,9 @@ canvas {
 }
 
 .brand {
-  display: inline-flex; /* Better alignment for icon+text */
+  display: inline-flex;
   align-items: center;
-  justify-content:left;
+  justify-content: left;
   font-size: 20px;
   font-weight: 800;
   letter-spacing: 1px;
@@ -59,17 +60,7 @@ canvas {
   mix-blend-mode: screen;
 }
 
-.brand-text {
-  display: inline-block;
-  font-family: Inter, system-ui, Arial;
-  font-size: 20px;
-  color: #fff;
-}
-
-.brand .accent {
-  color: #7dd3fc;
-  margin-left: 6px;
-}
+.brand .accent { color: #7dd3fc; margin-left: 6px; }
 
 /* --- RESPONSIVE RULES --- */
 @media (max-width: 768px) {
@@ -81,7 +72,7 @@ canvas {
 
   .viewer-left {
     width: 100%;
-    flex: none; /* Reset flex behavior on mobile */
+    flex: none; 
   }
 
   .viewer-sidebar {
@@ -90,7 +81,7 @@ canvas {
 
   .viewer-card {
     height: 60vh;
-    width: 100%; /* Force full width */
+    width: 100%;
   }
 }
 
