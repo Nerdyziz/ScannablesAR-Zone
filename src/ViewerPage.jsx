@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import ModelViewer from './ModelViewer';
 import './ViewerPage.css';
+import Logo from './assets/logo.svg';
 
 function ViewerPage() {
   const [model, setModel] = useState(null);
@@ -18,67 +19,32 @@ function ViewerPage() {
     (async () => {
       try {
         setLoading(true);
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const res = await fetch(`${apiUrl}/api/models/${shortId}`);
-        
-        if (!res.ok) {
-          if (res.status === 404) {
-            throw new Error('Model not found');
-          } else {
-            throw new Error(`Server error: ${res.status}`);
-          }
-        }
-        
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/models/${shortId}`);
+        if (!res.ok) throw new Error('Model not found');
         const data = await res.json();
         setModel(data);
         setViews(data.views || 0);
       } catch (err) {
-        console.error('Error loading model:', err);
-        setError(err.message || 'Failed to load model. Please check your connection.');
+        setError(err.message || 'Failed to load model');
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="viewer-page">
-        <div className="viewer-skeleton">
-          <div className="loading-spinner"></div>
-          Loading model...
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="viewer-page">
-        <div className="viewer-skeleton error">
-          <div className="error-icon">⚠️</div>
-          {error}
-          <button 
-            onClick={() => window.location.reload()} 
-            className="retry-button"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="viewer-skeleton">Loading model...</div>;
+  if (error) return <div className="viewer-skeleton error">{error}</div>;
 
   return (
     <div className="viewer-page">
       <header className="viewer-header">
         <div className="brand">
-          <div className="brand-logo-placeholder">
-            <span className="logo-symbol">⚡</span>
-          </div>
-          <span className="brand-text">
-            <span className="accent">AR</span> ZONE
-          </span>
+          <img 
+            src={Logo} 
+            alt="Logo" 
+            className="brand-logo"
+          />
+          <span className="accent">AR</span> ZONE
         </div>
 
         <div className="meta">
@@ -89,36 +55,14 @@ function ViewerPage() {
       <main className="viewer-main">
         <div className="viewer-left">
           <div className="viewer-card">
-            {model?.url ? (
-              <ModelViewer modelUrl={model.url} />
-            ) : (
-              <div className="model-error">No model URL provided</div>
-            )}
+            <ModelViewer modelUrl={model.url} />
           </div>
         </div>
 
         <aside className="viewer-sidebar">
           <div className="panel">
-            <h3>Model Info</h3>
-            <div className="info-item">
-              <label>Views:</label>
-              <span>{views}</span>
-            </div>
-            {model?.name && (
-              <div className="info-item">
-                <label>Name:</label>
-                <span>{model.name}</span>
-              </div>
-            )}
-          </div>
-          
-          <div className="panel mobile-instructions">
-            <h3>Mobile Instructions</h3>
-            <ul>
-              <li>• Drag to rotate the model</li>
-              <li>• Pinch to zoom in/out</li>
-              <li>• Tap "View in AR" to see in your space</li>
-            </ul>
+            <h4>Views</h4>
+            <p>{views}</p>
           </div>
         </aside>
       </main>
