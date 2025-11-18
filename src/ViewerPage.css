@@ -7,85 +7,95 @@
 .raw-link{ color:#7dd3fc; text-decoration:none; background: rgba(255,255,255,0.02); padding:6px 10px; border-radius:8px; }
 
 .viewer-main { display:flex; gap:18px; padding:22px; align-items:flex-start; }
-.viewer-left{ flex:1; }
-.viewer-card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; padding:0px; height:70vh; display:block; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.03); box-shadow: 0 12px 40px rgba(2,6,23,0.6); overflow: hidden; }
+.viewer-left{ flex:1; width: 100%; /* Ensure width on mobile */ }
+
+/* FIXED: Changed display to flex to ensure internal centering works */
+.viewer-card{ 
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); 
+  border-radius:12px; 
+  padding:0px; 
+  height:70vh; 
+  display:flex; /* Changed from block */
+  flex-direction: column; /* Ensure child fills correctly */
+  align-items:center; 
+  justify-content:center; 
+  border:1px solid rgba(255,255,255,0.03); 
+  box-shadow: 0 12px 40px rgba(2,6,23,0.6); 
+  overflow: hidden; 
+  position: relative; /* specific context */
+}
+
 .viewer-sidebar{ width:320px; }
 .panel{ background: rgba(255,255,255,0.02); padding:14px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); }
 .panel h4{ margin:8px 0 6px; color:#cbd5e1; }
 .panel p{ margin:0 0 10px; color:#99a1a8; }
 .viewer-skeleton{ padding:40px; color:#aaa; text-align:center;}
+
 canvas {
   display: block;
   outline: none;
-  /* Prevent aggressive GPU memory cleanup */
   transform: translateZ(0);
-
-  /* --- ADD THESE LINES --- */
   width: 100%;
   height: 100%;
 }
 
 .brand {
-  display: inline-block;
-  align-items: center;      /* horizontal centering for logo + text */
-  justify-content:left;      /* vertical centering for logo + text */              /* space between logo and text */
+  display: inline-flex; /* Better alignment for icon+text */
+  align-items: center;
+  justify-content:left;
   font-size: 20px;
   font-weight: 800;
   letter-spacing: 1px;
-  line-height: 1px;
   color: #ffffff;
   user-select: none;
 }
 
-/* Logo sizing & visual treatment */
 .brand-logo {
-  height: 50px;             /* slightly larger for better balance */
+  height: 50px;
   width: auto;
   display: block;
-  margin: 10px;                /* ensure no extra margins from image */
+  margin: 10px;
   filter: invert(1) brightness(2) drop-shadow(0 0 10px #00aaff);
   mix-blend-mode: screen;
 }
 
-/* The text next to the logo (keeps baseline/line-height tidy) */
 .brand-text {
   display: inline-block;
   font-family: Inter, system-ui, Arial;
   font-size: 20px;
   color: #fff;
-
 }
 
-/* Accent color for "AR" */
 .brand .accent {
   color: #7dd3fc;
   margin-left: 6px;
 }
 
-/* --- ADD THESE RESPONSIVE RULES --- */
-
+/* --- RESPONSIVE RULES --- */
 @media (max-width: 768px) {
   .viewer-main {
-    /* Stack the model and sidebar vertically */
     flex-direction: column;
     padding: 16px;
     gap: 16px;
   }
 
+  .viewer-left {
+    width: 100%;
+    flex: none; /* Reset flex behavior on mobile */
+  }
+
   .viewer-sidebar {
-    /* Make sidebar full-width on mobile */
     width: 100%;
   }
 
   .viewer-card {
-    /* Reduce height on tall/narrow screens */
     height: 60vh;
+    width: 100%; /* Force full width */
   }
 }
 
 @media (max-width: 480px) {
   .viewer-header {
-    /* Stack the brand and views badge on very small screens */
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;

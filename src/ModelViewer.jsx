@@ -32,21 +32,13 @@ export default function ModelViewer({ modelUrl }) {
         auto-rotate
         auto-rotate-delay="0"
         
-        /* --- SIZE & ZOOM SETTINGS --- */
+        /* FIXED: Removed strict 90deg lock and disable-pan. 
+           These settings often make the model invisible on mobile 
+           because the Viewport clips the fixed angle. */
         
-        /* 1. Physical Size: 1 = 100%, 1.8 = 180% size */
-      
-
-        /* 2. Camera Zoom: Lower value = closer/bigger (Default is ~45deg) */
-      
-
-        /* --- ROTATION SETTINGS --- */
         rotation-per-second="-60deg"
-        min-camera-orbit="auto 90deg auto" 
-        max-camera-orbit="auto 90deg auto"
-        disable-pan 
-
         shadow-intensity="1"
+        touch-action="pan-y" 
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
       >
         {/* Custom Progress Bar */}
