@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import ModelViewer from './ModelViewer';
 import './ViewerPage.css';
-import Logo from './assets/logo.svg';   // ✅ IMPORT YOUR LOGO
+import Logo from './assets/logo.svg';
 
 function ViewerPage() {
   const [model, setModel] = useState(null);
@@ -38,8 +38,6 @@ function ViewerPage() {
   return (
     <div className="viewer-page">
       <header className="viewer-header">
-
-        {/* ✅ BRAND WITH LOGO */}
         <div className="brand">
           <img 
             src={Logo} 

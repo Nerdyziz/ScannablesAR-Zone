@@ -1,18 +1,39 @@
 // frontend/src/ModelViewer.jsx
+
 import React, { useEffect, useState } from 'react';
 import '@google/model-viewer';
 
 export default function ModelViewer({ modelUrl }) {
   const [progress, setProgress] = useState(0);
+  const [arSupported, setArSupported] = useState(true);
 
   useEffect(() => {
     const modelViewer = document.querySelector('model-viewer');
+    
+    // Check AR support
+    const checkARSupport = async () => {
+      if ('xr' in navigator) {
+        try {
+          const supported = await navigator.xr.isSessionSupported('immersive-ar');
+          setArSupported(supported);
+        } catch (error) {
+          console.log('AR not supported:', error);
+          setArSupported(false);
+        }
+      } else {
+        setArSupported(false);
+      }
+    };
+
     if (modelViewer) {
       const onProgress = (event) => {
         const { totalProgress } = event.detail;
         setProgress(totalProgress * 100);
       };
+      
       modelViewer.addEventListener('progress', onProgress);
+      checkARSupport();
+      
       return () => {
         modelViewer.removeEventListener('progress', onProgress);
       };
@@ -30,23 +51,28 @@ export default function ModelViewer({ modelUrl }) {
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
         
-        /* --- ROTATION & ANIMATION --- */
+        /* Mobile-optimized rotation */
         auto-rotate 
         auto-rotate-delay="0"
-        rotation-per-second="-30deg" /* Slower, smoother spin */
-        disable-pan 
-
-        /* --- CAMERA FIXES FOR MOBILE --- */
-        /* 105% radius ensures the model fits in the viewport */
-        camera-orbit="0deg 75deg 105%" 
+        rotation-per-second="-25deg"
         
-        /* Lock vertical angle to 75deg (slight top-down view) */
-        min-camera-orbit="auto 75deg auto" 
-        max-camera-orbit="auto 75deg auto"
-
-        /* --- LIGHTING --- */
+        /* Better mobile camera setup */
+        camera-orbit="0deg 75deg 110%" 
+        min-camera-orbit="auto 60deg auto"
+        max-camera-orbit="auto 85deg auto"
+        
+        /* Touch interaction improvements */
+        touch-action="pan-y"
+        disable-zoom="false"
+        
+        /* Performance optimizations for mobile */
+        loading="eager"
+        reveal="auto"
+        
+        /* Lighting */
         shadow-intensity="1"
-        environment-image="neutral" /* Ensures model is lit even on dark backgrounds */
+        environment-image="neutral"
+        exposure="1.0"
         
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
       >
@@ -69,7 +95,7 @@ export default function ModelViewer({ modelUrl }) {
         {/* Custom AR Button */}
         <button slot="ar-button" style={{
           position: 'absolute',
-          bottom: '20px',
+          bottom: '70px',
           right: '20px',
           padding: '12px 24px',
           backgroundColor: 'white',
@@ -82,10 +108,27 @@ export default function ModelViewer({ modelUrl }) {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          zIndex: 100
+          zIndex: 1000
         }}>
           <span>📱 View in your space</span>
         </button>
+
+        {/* AR Support Warning */}
+        {!arSupported && (
+          <div style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '20px',
+            background: 'rgba(255,0,0,0.8)',
+            color: 'white',
+            padding: '8px 12px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            zIndex: 100
+          }}>
+            AR not supported on this device
+          </div>
+        )}
 
       </model-viewer>
     </div>

@@ -1,39 +1,113 @@
-/* ViewerPage.css */
-.viewer-page { min-height:100vh; background: linear-gradient(180deg,#050505, #0b0b0b); color:#fff; font-family:Inter,system-ui,Arial; }
-.viewer-header { display:flex; justify-content:space-between; align-items:center; padding:18px 28px; border-bottom:1px solid rgba(255,255,255,0.03); }
+/* frontend/src/ViewerPage.css */
 
-.meta { display:flex; gap:12px; align-items:center; }
-.views { background: rgba(255,255,255,0.03); padding:6px 10px; border-radius:8px; color:#cbd5e1; }
-.raw-link{ color:#7dd3fc; text-decoration:none; background: rgba(255,255,255,0.02); padding:6px 10px; border-radius:8px; }
+/* Reset and base styles */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
 
-.viewer-main { display:flex; gap:18px; padding:22px; align-items:flex-start; }
-.viewer-left{ flex:1; }
-.viewer-sidebar{ width:320px; }
-.panel{ background: rgba(255,255,255,0.02); padding:14px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); }
-.panel h4{ margin:8px 0 6px; color:#cbd5e1; }
-.panel p{ margin:0 0 10px; color:#99a1a8; }
-.viewer-skeleton{ padding:40px; color:#aaa; text-align:center;}
+.viewer-page { 
+  min-height: 100vh; 
+  background: linear-gradient(180deg,#050505, #0b0b0b); 
+  color:#fff; 
+  font-family: Inter, system-ui, Arial;
+  position: relative;
+  width: 100vw;
+}
+
+.viewer-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 18px 28px; 
+  border-bottom: 1px solid rgba(255,255,255,0.03); 
+}
+
+.meta { 
+  display: flex; 
+  gap: 12px; 
+  align-items: center; 
+}
+
+.views { 
+  background: rgba(255,255,255,0.03); 
+  padding: 6px 10px; 
+  border-radius: 8px; 
+  color: #cbd5e1; 
+}
+
+.raw-link { 
+  color: #7dd3fc; 
+  text-decoration: none; 
+  background: rgba(255,255,255,0.02); 
+  padding: 6px 10px; 
+  border-radius: 8px; 
+}
+
+.viewer-main { 
+  display: flex; 
+  gap: 18px; 
+  padding: 22px; 
+  align-items: flex-start; 
+}
+
+.viewer-left { 
+  flex: 1; 
+}
+
+.viewer-sidebar { 
+  width: 320px; 
+}
+
+.panel { 
+  background: rgba(255,255,255,0.02); 
+  padding: 14px; 
+  border-radius: 10px; 
+  border: 1px solid rgba(255,255,255,0.03); 
+}
+
+.panel h4 { 
+  margin: 8px 0 6px; 
+  color: #cbd5e1; 
+}
+
+.panel p { 
+  margin: 0 0 10px; 
+  color: #99a1a8; 
+}
+
+.viewer-skeleton { 
+  padding: 40px; 
+  color: #aaa; 
+  text-align: center;
+}
+
+.viewer-skeleton.error {
+  color: #ff6b6b;
+}
+
 canvas {
   display: block;
   outline: none;
 }
+
 .viewer-card {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
   border-radius: 12px;
-  /* Removed padding so the model fills the box */
-  padding: 0; 
+  padding: 0;
   height: 70vh;
-  /* Removed flex centering to prevent squashing */
-  display: block; 
+  display: block;
   border: 1px solid rgba(255,255,255,0.03);
   box-shadow: 0 12px 40px rgba(2,6,23,0.6);
-  overflow: hidden; /* Keeps the model inside the rounded corners */
+  overflow: hidden;
   position: relative;
 }
+
 .brand {
   display: inline-block;
-  align-items: center;      /* horizontal centering for logo + text */
-  justify-content:left;      /* vertical centering for logo + text */              /* space between logo and text */
+  align-items: center;
+  justify-content: left;
   font-size: 20px;
   font-weight: 800;
   letter-spacing: 1px;
@@ -42,58 +116,106 @@ canvas {
   user-select: none;
 }
 
-/* Logo sizing & visual treatment */
 .brand-logo {
-  height: 50px;             /* slightly larger for better balance */
+  height: 50px;
   width: auto;
   display: block;
-  margin: 10px;                /* ensure no extra margins from image */
+  margin: 10px;
   filter: invert(1) brightness(2) drop-shadow(0 0 10px #00aaff);
   mix-blend-mode: screen;
 }
 
-/* The text next to the logo (keeps baseline/line-height tidy) */
 .brand-text {
   display: inline-block;
   font-family: Inter, system-ui, Arial;
   font-size: 20px;
   color: #fff;
-
 }
 
-/* Accent color for "AR" */
 .brand .accent {
   color: #7dd3fc;
   margin-left: 6px;
 }
 
-/* --- ADD THESE RESPONSIVE RULES --- */
+/* Mobile AR Button Fix */
+button[slot="ar-button"] {
+  position: absolute !important;
+  bottom: 70px !important;
+  right: 20px !important;
+  z-index: 1000 !important;
+}
 
+/* Responsive Design */
 @media (max-width: 768px) {
   .viewer-main {
-    /* Stack the model and sidebar vertically */
     flex-direction: column;
     padding: 16px;
     gap: 16px;
   }
 
   .viewer-sidebar {
-    /* Make sidebar full-width on mobile */
     width: 100%;
   }
 
   .viewer-card {
-    /* Reduce height on tall/narrow screens */
     height: 60vh;
+    min-height: 400px;
+  }
+
+  .viewer-header {
+    padding: 16px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+
+  .brand-logo {
+    height: 40px;
+  }
+
+  model-viewer {
+    min-height: 300px;
   }
 }
 
 @media (max-width: 480px) {
   .viewer-header {
-    /* Stack the brand and views badge on very small screens */
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
     padding: 16px;
+  }
+
+  .viewer-card {
+    height: 50vh;
+    min-height: 350px;
+  }
+
+  .meta {
+    align-self: flex-end;
+  }
+
+  button[slot="ar-button"] {
+    bottom: 60px !important;
+    right: 15px !important;
+    padding: 10px 20px !important;
+    font-size: 14px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .viewer-card {
+    height: 45vh;
+    min-height: 300px;
+  }
+  
+  .brand {
+    font-size: 16px;
+  }
+  
+  .brand-logo {
+    height: 35px;
   }
 }
