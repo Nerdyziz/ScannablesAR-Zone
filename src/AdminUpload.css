@@ -1,0 +1,30 @@
+/* AdminUpload.css */
+:root{
+  --bg:#0f1113; --card:#111214; --accent:#6ee7b7; --muted:#9aa0a6;
+  --glass: rgba(255,255,255,0.04);
+}
+body { background: linear-gradient(180deg,#050507 0%, #0b0c0d 100%); color:#eee; font-family:Inter,system-ui,Arial; }
+
+.admin-wrap{ display:flex; gap:20px; padding:28px; align-items:flex-start; }
+.admin-card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; padding:18px; width:360px; box-shadow: 0 6px 30px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03);}
+.admin-card h2{ margin:0 0 12px; color:var(--accent); }
+.field{ display:block; margin-bottom:10px; font-size:13px; color:var(--muted); }
+.field input{ width:100%; margin-top:6px; padding:8px 10px; border-radius:8px; background:#0b0b0c; border:1px solid rgba(255,255,255,0.04); color:#fff; }
+.upload-form{ display:flex; gap:8px; align-items:center; }
+.upload-form input[type=file]{ flex:1; color:#fff; }
+.btn{ background:var(--accent); color:#041014; padding:8px 12px; border-radius:8px; font-weight:700; border:none; cursor:pointer;}
+.message{ margin-top:10px; color:var(--muted); }
+
+/* models list */
+.models-grid{ flex:1; }
+.models-grid h3{ color:#fff; margin-bottom:8px; }
+.cards{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:12px; }
+.model-card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)); border-radius:10px; padding:12px; border:1px solid rgba(255,255,255,0.03); }
+.card-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.name{ font-weight:700; color:#fff; }
+.meta{ color:var(--muted); font-size:13px; }
+.link{ font-size:12px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%; display:block; }
+.card-actions{ margin-top:10px; display:flex; gap:8px; }
+.btn.small{ padding:6px 8px; font-size:13px; }
+.btn.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:#fff; }
+.btn.danger{ background:#ff6b6b; color:#fff; }
