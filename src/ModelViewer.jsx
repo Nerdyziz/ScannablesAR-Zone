@@ -80,7 +80,8 @@ const ModelViewer = ({ modelUrl }) => {
         camera-controls
         auto-rotate
         auto-rotate-delay="0"
-        rotation-per-second="30deg"
+        disable-pan
+        rotation-per-second="-30deg"
         camera-orbit="0deg 75deg 105%"
         min-camera-orbit="auto 60deg auto"
         max-camera-orbit="auto 85deg auto"
