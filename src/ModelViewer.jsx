@@ -1,136 +1,172 @@
 // frontend/src/ModelViewer.jsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import '@google/model-viewer';
 
-export default function ModelViewer({ modelUrl }) {
+const ModelViewer = ({ modelUrl }) => {
   const [progress, setProgress] = useState(0);
-  const [arSupported, setArSupported] = useState(true);
+  const [arSupported, setArSupported] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const modelViewerRef = useRef(null);
 
   useEffect(() => {
-    const modelViewer = document.querySelector('model-viewer');
-    
     // Check AR support
     const checkARSupport = async () => {
-      if ('xr' in navigator) {
-        try {
+      try {
+        if ('xr' in navigator) {
           const supported = await navigator.xr.isSessionSupported('immersive-ar');
           setArSupported(supported);
-        } catch (error) {
-          console.log('AR not supported:', error);
+        } else {
           setArSupported(false);
         }
-      } else {
+      } catch (error) {
+        console.log('AR support check failed:', error);
         setArSupported(false);
       }
     };
 
-    if (modelViewer) {
-      const onProgress = (event) => {
-        const { totalProgress } = event.detail;
-        setProgress(totalProgress * 100);
-      };
-      
-      modelViewer.addEventListener('progress', onProgress);
-      checkARSupport();
-      
-      return () => {
-        modelViewer.removeEventListener('progress', onProgress);
-      };
-    }
+    checkARSupport();
   }, []);
 
-  if (!modelUrl) return null;
+  useEffect(() => {
+    const modelViewer = modelViewerRef.current;
+    
+    if (!modelViewer || !modelUrl) return;
+
+    const handleLoad = () => {
+      setLoading(false);
+      setError(null);
+    };
+
+    const handleError = (event) => {
+      console.error('Model loading error:', event);
+      setError('Failed to load 3D model');
+      setLoading(false);
+    };
+
+    const handleProgress = (event) => {
+      const { totalProgress } = event.detail;
+      setProgress(Math.round(totalProgress * 100));
+    };
+
+    modelViewer.addEventListener('load', handleLoad);
+    modelViewer.addEventListener('error', handleError);
+    modelViewer.addEventListener('progress', handleProgress);
+
+    return () => {
+      modelViewer.removeEventListener('load', handleLoad);
+      modelViewer.removeEventListener('error', handleError);
+      modelViewer.removeEventListener('progress', handleProgress);
+    };
+  }, [modelUrl]);
+
+  if (!modelUrl) {
+    return (
+      <div className="model-viewer-error">
+        No model URL provided
+      </div>
+    );
+  }
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div className="model-viewer-container">
       <model-viewer
+        ref={modelViewerRef}
         src={modelUrl}
-        alt="A 3D model"
+        alt="3D Model"
         ar
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
-        
-        /* Mobile-optimized rotation */
-        auto-rotate 
+        auto-rotate
         auto-rotate-delay="0"
-        rotation-per-second="-25deg"
-        
-        /* Better mobile camera setup */
-        camera-orbit="0deg 75deg 110%" 
+        rotation-per-second="30deg"
+        camera-orbit="0deg 75deg 105%"
         min-camera-orbit="auto 60deg auto"
         max-camera-orbit="auto 85deg auto"
-        
-        /* Touch interaction improvements */
-        touch-action="pan-y"
-        disable-zoom="false"
-        
-        /* Performance optimizations for mobile */
-        loading="eager"
-        reveal="auto"
-        
-        /* Lighting */
         shadow-intensity="1"
         environment-image="neutral"
         exposure="1.0"
-        
-        style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
+        loading="eager"
+        style={{
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'transparent'
+        }}
       >
-        {/* Custom Progress Bar */}
-        <div slot="progress-bar" style={{
-             position: 'absolute',
-             top: '50%', left: '50%',
-             transform: 'translate(-50%, -50%)',
-             background: 'rgba(0,0,0,0.7)',
-             padding: '10px 20px',
-             borderRadius: '8px',
-             color: 'white',
-             display: progress >= 100 ? 'none' : 'block',
-             pointerEvents: 'none',
-             zIndex: 10
-        }}>
-           Loading... {Math.round(progress)}%
-        </div>
-
-        {/* Custom AR Button */}
-        <button slot="ar-button" style={{
-          position: 'absolute',
-          bottom: '70px',
-          right: '20px',
-          padding: '12px 24px',
-          backgroundColor: 'white',
-          color: 'black',
-          border: 'none',
-          borderRadius: '30px',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          zIndex: 1000
-        }}>
-          <span>📱 View in your space</span>
-        </button>
-
-        {/* AR Support Warning */}
-        {!arSupported && (
-          <div style={{
-            position: 'absolute',
-            bottom: '20px',
-            left: '20px',
-            background: 'rgba(255,0,0,0.8)',
-            color: 'white',
-            padding: '8px 12px',
-            borderRadius: '6px',
-            fontSize: '12px',
-            zIndex: 100
-          }}>
-            AR not supported on this device
+        {/* Loading Overlay */}
+        {loading && progress < 100 && (
+          <div className="loading-overlay" slot="progress-bar">
+            <div className="progress-container">
+              <div className="progress-bar">
+                <div 
+                  className="progress-fill" 
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+              <div className="progress-text">Loading... {progress}%</div>
+            </div>
           </div>
         )}
 
+        {/* AR Button */}
+        <button 
+          className="ar-button" 
+          slot="ar-button"
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            right: '20px',
+            padding: '12px 20px',
+            backgroundColor: '#ffffff',
+            color: '#000000',
+            border: 'none',
+            borderRadius: '24px',
+            fontWeight: '600',
+            fontSize: '14px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            zIndex: 1000,
+            fontFamily: 'inherit'
+          }}
+        >
+          <span>📱</span>
+          View in AR
+        </button>
+
+        {/* Error Message */}
+        {error && (
+          <div className="model-error-message">
+            {error}
+          </div>
+        )}
+
+        {/* AR Support Warning */}
+        {arSupported === false && (
+          <div 
+            className="ar-warning"
+            style={{
+              position: 'absolute',
+              bottom: '80px',
+              left: '20px',
+              background: 'rgba(255, 59, 48, 0.9)',
+              color: 'white',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              fontSize: '12px',
+              zIndex: 100,
+              maxWidth: '200px'
+            }}
+          >
+            AR not available on this device
+          </div>
+        )}
       </model-viewer>
     </div>
   );
-}
+};
+
+export default ModelViewer;
