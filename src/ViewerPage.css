@@ -8,7 +8,7 @@
 
 .viewer-main { display:flex; gap:18px; padding:22px; align-items:flex-start; }
 .viewer-left{ flex:1; }
-.viewer-card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; padding:12px; height:70vh; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.03); box-shadow: 0 12px 40px rgba(2,6,23,0.6); }
+.viewer-card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; padding:0px; height:70vh; display:block; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.03); box-shadow: 0 12px 40px rgba(2,6,23,0.6); overflow: hidden; }
 .viewer-sidebar{ width:320px; }
 .panel{ background: rgba(255,255,255,0.02); padding:14px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); }
 .panel h4{ margin:8px 0 6px; color:#cbd5e1; }

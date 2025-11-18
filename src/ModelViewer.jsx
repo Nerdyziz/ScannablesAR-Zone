@@ -29,24 +29,25 @@ export default function ModelViewer({ modelUrl }) {
         ar
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
-        auto-rotate
+        
+        /* --- ROTATION & ANIMATION --- */
+        auto-rotate 
         auto-rotate-delay="0"
-        
-        /* --- SIZE & ZOOM SETTINGS --- */
-        
-        /* 1. Physical Size: 1 = 100%, 1.8 = 180% size */
-      
-
-        /* 2. Camera Zoom: Lower value = closer/bigger (Default is ~45deg) */
-      
-
-        /* --- ROTATION SETTINGS --- */
-        rotation-per-second="-60deg"
-        min-camera-orbit="auto 90deg auto" 
-        max-camera-orbit="auto 90deg auto"
+        rotation-per-second="-30deg" /* Slower, smoother spin */
         disable-pan 
 
+        /* --- CAMERA FIXES FOR MOBILE --- */
+        /* 105% radius ensures the model fits in the viewport */
+        camera-orbit="0deg 75deg 105%" 
+        
+        /* Lock vertical angle to 75deg (slight top-down view) */
+        min-camera-orbit="auto 75deg auto" 
+        max-camera-orbit="auto 75deg auto"
+
+        /* --- LIGHTING --- */
         shadow-intensity="1"
+        environment-image="neutral" /* Ensures model is lit even on dark backgrounds */
+        
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
       >
         {/* Custom Progress Bar */}
@@ -59,7 +60,8 @@ export default function ModelViewer({ modelUrl }) {
              borderRadius: '8px',
              color: 'white',
              display: progress >= 100 ? 'none' : 'block',
-             pointerEvents: 'none'
+             pointerEvents: 'none',
+             zIndex: 10
         }}>
            Loading... {Math.round(progress)}%
         </div>
