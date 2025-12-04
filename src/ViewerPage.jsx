@@ -191,21 +191,33 @@ function ViewerPage() {
         /* === MOBILE LAYOUT (Max-width: 768px) === */
         @media (max-width: 768px) {
           .section-wrapper {
-            align-items: flex-end; /* Push text to bottom */
-            justify-content: center !important; /* Always center horizontally */
+            align-items: flex-end; /* Keep text at bottom */
             padding-bottom: 80px; /* Space for AR button/UI */
           }
+          
+          /* RESTORE LEFT/RIGHT POSITIONING ON MOBILE */
+          .section-wrapper.left { justify-content: flex-start; padding-left: 15px; }
+          .section-wrapper.right { justify-content: flex-end; padding-right: 15px; }
 
           .text-card {
-            width: 100%;      /* Full width on mobile */
-            max-width: 90%;   /* Slight margin */
-            border-left: none;
-            border-top: 4px solid blue; /* Move accent to top */
+            width: 75%;      
+            max-width: 300px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5));
+          }
+
+          /* LEFT CARD STYLE */
+          .section-wrapper.left .text-card {
+            border-left: 4px solid blue;
             text-align: left;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5)); /* Gradient fade */
+          }
+
+          /* RIGHT CARD STYLE (Border on Right) */
+          .section-wrapper.right .text-card {
+            border-left: none;
+            border-right: 4px solid blue;
+            text-align: right;
           }
           
-          /* Adjust header position for notch phones */
           .overlay-header { top: 15px; left: 15px; font-size: 1rem; }
         }
       `}</style>
