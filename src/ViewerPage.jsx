@@ -190,6 +190,8 @@ function ViewerPage() {
 
         /* === MOBILE LAYOUT (Max-width: 768px) === */
         @media (max-width: 768px) {
+         .section-wrapper.left { justify-content: flex-start; padding-left: 10%; }
+          .section-wrapper.right { justify-content: flex-end; padding-right: 10%; }
           .section-wrapper {
             align-items: flex-end; /* Push text to bottom */
             justify-content: center !important; /* Always center horizontally */
