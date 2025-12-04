@@ -126,16 +126,16 @@ export default function ModelViewer({ modelUrl, info }) {
           </svg>
 
           {/* BOXES */}
-          <div style={boxStyle({ top: '10%', left: '5%' })}>
+          <div style={boxStyle({ top: '10%', left: '5%', color: 'blue' })}>
             {info?.tl || ''}
           </div>
-          <div style={boxStyle({ top: '10%', right: '5%' })}>
+          <div style={boxStyle({ top: '10%', right: '5%', color: 'blue' })}>
              {info?.tr || ''}
           </div>
-          <div style={boxStyle({ bottom: '10%', left: '5%' })}>
+          <div style={boxStyle({ bottom: '10%', left: '5%' , color: 'blue' })}>
              {info?.bl || ''}
           </div>
-          <div style={boxStyle({ bottom: '10%', right: '5%' })}>
+          <div style={boxStyle({ bottom: '10%', right: '5%', color: 'blue' })}>
              {info?.br || ''}
           </div>
         </div>
