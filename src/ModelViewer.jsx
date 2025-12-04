@@ -21,23 +21,26 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
         ar 
         ar-modes="webxr scene-viewer quick-look"
         
-        // === DYNAMIC INTERACTION LOGIC ===
-        // If enableInteractions is TRUE (at the end of scroll):
-        // 1. Enable manual controls
-        // 2. Enable Auto-Rotate
-        // 3. Enable Zoom/Pan
+        // === INTERACTION LOGIC ===
         camera-controls={enableInteractions}
         auto-rotate={enableInteractions}
         auto-rotate-delay="0"
-        rotation-per-second="-60deg"
+        rotation-per-second="-30deg" // Slower auto-rotate for classier feel
         
-        // If interactive, use "auto" (default). If scrolling, use the specific angle.
-        camera-orbit={enableInteractions ? "auto auto auto" : (cameraOrbit || "0deg 75deg 105%")}
+        // === FIX FOR MISALIGNMENT ===
+        // 1. When Interactive: Pass undefined. This lets the user/auto-rotate control the camera fully without fighting "auto".
+        // 2. When Scrolling: Pass the specific angle (e.g. "0deg 75deg 105%").
+        camera-orbit={enableInteractions ? undefined : (cameraOrbit || "0deg 75deg 105%")}
         
+        // Reset panning target when scrolling so model is always centered
+        camera-target="auto auto auto"
+        
+        // === SNAP SPEED ===
+        // 200 = Tighter/Faster tracking. 
+        // This ensures the model aligns with the text cards quickly when you scroll up.
         interpolation-decay="200"
         
-        // Disable Zoom/Pan ONLY while scrolling (to keep the user focused)
-        // Re-enable them when at the end
+        // Lock controls when scrolling
         disable-pan={!enableInteractions}
         disable-zoom={!enableInteractions}
         
