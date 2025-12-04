@@ -199,8 +199,8 @@ function ViewerPage() {
           .text-card {
             width: 50%;      /* Full width on mobile */
             max-width: 90%;   /* Slight margin */
-            border-left: none;
-            border-top: 4px solid blue; /* Move accent to top */
+            border-top: none;
+            border-left: 4px solid blue; /* Move accent to top */
             text-align: left;
             background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5)); /* Gradient fade */
           }
