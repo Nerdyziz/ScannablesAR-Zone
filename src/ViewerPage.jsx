@@ -197,7 +197,8 @@ function ViewerPage() {
           
           /* RESTORE LEFT/RIGHT POSITIONING ON MOBILE */
           .section-wrapper.left { justify-content: flex-start; padding-left: 15px; }
-          .section-wrapper.right { justify-content: flex-end; padding-right: 15px; }
+          .section-wrapper.right { justify-content: flex-end; padding-right: 15px; border-left: none;
+            border-right: 4px solid blue;}
 
           .text-card {
             width: 75%;      
