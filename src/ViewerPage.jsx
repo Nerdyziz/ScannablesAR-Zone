@@ -29,11 +29,9 @@ function ViewerPage() {
   // 2. Handle Scroll
   useEffect(() => {
     const handleScroll = () => {
-      // Calculate which "Page" we are on (0, 1, 2, or 3)
-      const scrollPosition = window.scrollY + (window.innerHeight / 3); // Trigger slightly early
+      // Calculate active section based on scroll position
+      const scrollPosition = window.scrollY + (window.innerHeight / 2); 
       const sectionIndex = Math.floor(scrollPosition / window.innerHeight);
-      
-      // Keep within bounds (0 to 3)
       const safeIndex = Math.max(0, Math.min(sectionIndex, 3));
       setActiveSection(safeIndex);
     };
@@ -45,114 +43,171 @@ function ViewerPage() {
   if (loading) return <div style={{color:'white', padding:'20px'}}>Loading Model...</div>;
   if (error) return <div style={{color:'red', padding:'20px'}}>Error: {error}</div>;
 
-  // === DYNAMIC CONTENT CONFIGURATION ===
-  // We map the 4 text fields from Admin (tl, tr, bl, br) to 4 narrative sections
+  // Map Admin Text to Sections
   const sections = [
-    { 
-      id: 0, 
-      label: "FRONT VIEW", 
-      text: model.info?.tl || "Detailed Front Profile", 
-      orbit: "0deg 75deg 105%"  // Front
-    },
-    { 
-      id: 1, 
-      label: "SIDE PROFILE", 
-      text: model.info?.tr || "Sleek Side Silhouette", 
-      orbit: "90deg 75deg 105%" // Side
-    },
-    { 
-      id: 2, 
-      label: "BACK DESIGN", 
-      text: model.info?.bl || "Signature Back Details", 
-      orbit: "180deg 75deg 105%" // Back
-    },
-    { 
-      id: 3, 
-      label: "FABRIC & MATERIAL", 
-      text: model.info?.br || "Premium Quality Material", 
-      orbit: "0deg 30deg 60%"   // Top Zoom
-    }
+    { id: 0, label: "FRONT VIEW", text: model.info?.tl || "Detailed Front Profile", orbit: "0deg 75deg 105%" },
+    { id: 1, label: "SIDE PROFILE", text: model.info?.tr || "Sleek Side Silhouette", orbit: "90deg 75deg 105%" },
+    { id: 2, label: "BACK DESIGN", text: model.info?.bl || "Signature Back Details", orbit: "180deg 75deg 105%" },
+    { id: 3, label: "FABRIC & MATERIAL", text: model.info?.br || "Premium Quality Material", orbit: "0deg 30deg 60%" }
   ];
 
   return (
-    <div className="scrolly-container" style={{ backgroundColor: '#050505', minHeight: '400vh' }}>
+    <div className="scrolly-container">
       
       {/* === BACKGROUND LAYER (FIXED 3D MODEL) === */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100vh',
-        zIndex: 0 // Behind the text
-      }}>
+      <div className="fixed-background">
         <ModelViewer 
           modelUrl={model.url} 
           cameraOrbit={sections[activeSection].orbit} 
         />
         
-        {/* Persistent Overlay Header */}
-        <div style={{ 
-          position: 'absolute', top: 20, left: 20, zIndex: 10,
-          fontFamily: 'Orbitron, sans-serif', color: 'white', fontSize: '1.2rem' 
-        }}>
+        {/* Header */}
+        <div className="overlay-header">
           SCANNABLES <span style={{ color: '#00f' }}>ARZONE</span>
         </div>
         
-        {/* Scroll Indicator (Only visible on first section) */}
-        <div style={{
-            position: 'absolute', bottom: 30, width: '100%', textAlign: 'center',
-            color: 'white', opacity: activeSection === 0 ? 0.7 : 0, transition: 'opacity 0.5s',
-            animation: 'bounce 2s infinite', pointerEvents: 'none'
-        }}>
+        {/* Scroll Indicator (Only on first section) */}
+        <div className={`scroll-hint ${activeSection === 0 ? 'visible' : ''}`}>
           ↓ SCROLL TO EXPLORE
         </div>
       </div>
 
       {/* === FOREGROUND LAYER (SCROLLING TEXT) === */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      <div className="scroll-content">
         {sections.map((section, index) => (
-          <div key={section.id} style={{
-            height: '100vh', // Each section takes full screen height
-            display: 'flex',
-            alignItems: 'center', // Vertically center
-            justifyContent: index % 2 === 0 ? 'flex-start' : 'flex-end', // Alternating Left/Right
-            padding: '10%',
-            boxSizing: 'border-box'
-          }}>
+          <div key={section.id} className={`section-wrapper ${index % 2 === 0 ? 'left' : 'right'}`}>
+            
             {/* Text Card */}
-            <div style={{
-              background: 'rgba(0, 0, 0, 0.6)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid #333',
-              borderLeft: '4px solid blue',
-              padding: '30px',
-              maxWidth: '300px',
-              color: 'white',
-              fontFamily: 'Orbitron, sans-serif',
-              // Animation based on visibility
-              opacity: activeSection === index ? 1 : 0.3,
-              transform: activeSection === index ? 'translateY(0)' : 'translateY(30px)',
-              transition: 'all 0.6s ease-out'
-            }}>
-              <h3 style={{ margin: '0 0 10px 0', color: '#00f', fontSize: '0.9rem' }}>
-                0{index + 1} // {section.label}
-              </h3>
-              <p style={{ margin: 0, fontSize: '1.2rem', lineHeight: '1.5' }}>
-                {section.text}
-              </p>
+            <div className={`text-card ${activeSection === index ? 'active' : ''}`}>
+              <h3>0{index + 1} // {section.label}</h3>
+              <p>{section.text}</p>
             </div>
+
           </div>
         ))}
       </div>
 
+      {/* === CSS STYLES (Responsive) === */}
       <style>{`
+        /* --- GLOBAL & ANIMATIONS --- */
+        body { margin: 0; background: #050505; overflow-x: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
         @keyframes bounce {
           0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
           40% {transform: translateY(-10px);}
           60% {transform: translateY(-5px);}
         }
-        body { margin: 0; overflow-x: hidden; background: #050505; }
+
+        /* --- LAYOUT CONTAINERS --- */
+        .scrolly-container {
+          min-height: 400vh;
+          /* Snap scrolling for better mobile feel */
+          scroll-snap-type: y mandatory; 
+        }
+
+        .fixed-background {
+          position: fixed;
+          top: 0; left: 0;
+          width: 100%; height: 100vh;
+          z-index: 0;
+        }
+
+        .scroll-content {
+          position: relative;
+          z-index: 1;
+        }
+
+        /* --- HEADER & HINT --- */
+        .overlay-header {
+          position: absolute; top: 20px; left: 20px; z-index: 10;
+          font-family: 'Orbitron', sans-serif; color: white; font-size: 1.2rem;
+        }
+
+        .scroll-hint {
+          position: absolute; bottom: 80px; width: 100%; text-align: center;
+          color: white; font-family: 'Orbitron', sans-serif; font-size: 0.8rem;
+          opacity: 0; transition: opacity 0.5s;
+          pointer-events: none;
+        }
+        .scroll-hint.visible {
+          opacity: 0.7;
+          animation: bounce 2s infinite;
+        }
+
+        /* --- SECTION WRAPPERS --- */
+        .section-wrapper {
+          height: 100vh;
+          width: 100%;
+          display: flex;
+          align-items: center; /* Vertically center by default */
+          padding: 20px;
+          box-sizing: border-box;
+          scroll-snap-align: start; /* Snap to top of section */
+        }
+
+        /* --- TEXT CARDS --- */
+        .text-card {
+          background: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px); /* Safari support */
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-left: 4px solid blue;
+          padding: 25px;
+          max-width: 300px;
+          color: white;
+          font-family: 'Orbitron', sans-serif;
+          
+          /* Animation State */
+          opacity: 0.3;
+          transform: translateY(30px);
+          transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .text-card.active {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .text-card h3 {
+          margin: 0 0 10px 0;
+          color: #00f;
+          font-size: 0.9rem;
+          letter-spacing: 1px;
+        }
+
+        .text-card p {
+          margin: 0;
+          line-height: 1.5;
+          font-size: clamp(1rem, 4vw, 1.2rem); /* Responsive Font Size */
+        }
+
+        /* === DESKTOP LAYOUT (Min-width: 769px) === */
+        @media (min-width: 769px) {
+          .section-wrapper.left { justify-content: flex-start; padding-left: 10%; }
+          .section-wrapper.right { justify-content: flex-end; padding-right: 10%; }
+        }
+
+        /* === MOBILE LAYOUT (Max-width: 768px) === */
+        @media (max-width: 768px) {
+          .section-wrapper {
+            align-items: flex-end; /* Push text to bottom */
+            justify-content: center !important; /* Always center horizontally */
+            padding-bottom: 80px; /* Space for AR button/UI */
+          }
+
+          .text-card {
+            width: 100%;      /* Full width on mobile */
+            max-width: 90%;   /* Slight margin */
+            border-left: none;
+            border-top: 4px solid blue; /* Move accent to top */
+            text-align: left;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5)); /* Gradient fade */
+          }
+          
+          /* Adjust header position for notch phones */
+          .overlay-header { top: 15px; left: 15px; font-size: 1rem; }
+        }
       `}</style>
     </div>
   );
