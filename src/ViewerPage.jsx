@@ -197,7 +197,7 @@ function ViewerPage() {
           }
 
           .text-card {
-            width: 100%;      /* Full width on mobile */
+            width: 50%;      /* Full width on mobile */
             max-width: 90%;   /* Slight margin */
             border-left: none;
             border-top: 4px solid blue; /* Move accent to top */
