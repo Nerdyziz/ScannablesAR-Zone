@@ -1,9 +1,10 @@
 // frontend/src/ViewerPage.jsx
-
 import React, { useEffect, useState } from 'react';
 import ModelViewer from './ModelViewer';
 import './ViewerPage.css';
-import Logo from './assets/logo.svg';
+// import Logo from './assets/logo.svg'; // Uncomment if you have your logo
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function ViewerPage() {
   const [model, setModel] = useState(null);
@@ -19,7 +20,7 @@ function ViewerPage() {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/models/${shortId}`);
+        const res = await fetch(`${API}/api/models/${shortId}`);
         if (!res.ok) throw new Error('Model not found');
         const data = await res.json();
         setModel(data);
@@ -36,16 +37,13 @@ function ViewerPage() {
   if (error) return <div className="viewer-skeleton error">{error}</div>;
 
   return (
-    <>
     <div className="viewer-page">
       <header className="viewer-header">
         <div className="brand">
-          <img 
-            src={Logo} 
-            alt="Logo" 
-            className="brand-logo"
-          />
-          <span className="accent">AR</span> ZONE
+           {/* <img src={Logo} alt="Logo" className="brand-logo" /> */}
+           <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: 'white' }}>
+             SCANNABLES <span style={{ color: '#00f' }}>ARZONE</span>
+           </span>
         </div>
 
         <div className="meta">
@@ -56,7 +54,9 @@ function ViewerPage() {
       <main className="viewer-main">
         <div className="viewer-left">
           <div className="viewer-card">
+            {/* === THIS WAS THE MISSING PART === */}
             <ModelViewer modelUrl={model.url} info={model.info} />
+            {/* ================================= */}
           </div>
         </div>
 
@@ -68,7 +68,6 @@ function ViewerPage() {
         </aside>
       </main>
     </div>
-    </>
   );
 }
 
