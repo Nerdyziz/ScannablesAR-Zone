@@ -12,6 +12,12 @@ export default function AdminUpload() {
   const [loading, setLoading] = useState(false);
   const [lastCreatedLink, setLastCreatedLink] = useState('');
 
+
+  const [infoTL, setInfoTL] = useState('');
+  const [infoTR, setInfoTR] = useState('');
+  const [infoBL, setInfoBL] = useState('');
+  const [infoBR, setInfoBR] = useState('');
+
   useEffect(() => {
     fetchModels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,6 +49,12 @@ export default function AdminUpload() {
     setMessage('Uploading...');
     const fd = new FormData();
     fd.append('modelFile', file);
+    
+    // --- APPEND TEXT DATA ---
+    fd.append('infoTL', infoTL);
+    fd.append('infoTR', infoTR);
+    fd.append('infoBL', infoBL);
+    fd.append('infoBR', infoBR);
 
     try {
       const res = await fetch(`${API}/api/upload`, {
@@ -64,7 +76,6 @@ export default function AdminUpload() {
         return;
       }
 
-      // Prefer explicit viewLink, otherwise construct from returned model
       const viewLink =
         payload.viewLink ||
         (payload.model && payload.model.viewLink) ||
@@ -72,11 +83,9 @@ export default function AdminUpload() {
         (payload.model && payload.model._id && `${window.location.origin}/view/${payload.model._id}`) ||
         null;
 
-      // Update UI list: prefer inserting returned model if provided
       if (payload.model) {
         setModels(prev => [payload.model, ...prev.filter(x => x._id !== payload.model._id)]);
       } else {
-        // fallback: refresh list
         await fetchModels();
       }
 
@@ -84,6 +93,8 @@ export default function AdminUpload() {
         setLastCreatedLink(viewLink);
         setMessage('Upload successful — link created below.');
         setFile(null);
+        // Reset text fields
+        setInfoTL(''); setInfoTR(''); setInfoBL(''); setInfoBR('');
         return;
       }
 
@@ -108,7 +119,6 @@ export default function AdminUpload() {
         return;
       }
       setMessage('Deleted');
-      // optimistically remove from UI
       setModels(prev => prev.filter(m => m.shortId !== shortId));
       if (lastCreatedLink && lastCreatedLink.includes(shortId)) setLastCreatedLink('');
     } catch (e) {
@@ -157,6 +167,15 @@ export default function AdminUpload() {
               setMessage('');
             }}
           />
+          
+          {/* --- NEW INPUTS FOR 4 CORNERS --- */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px', marginBottom: '10px' }}>
+             <input placeholder="Top Left Text" value={infoTL} onChange={e=>setInfoTL(e.target.value)} className="field-input"/>
+             <input placeholder="Top Right Text" value={infoTR} onChange={e=>setInfoTR(e.target.value)} className="field-input"/>
+             <input placeholder="Bottom Left Text" value={infoBL} onChange={e=>setInfoBL(e.target.value)} className="field-input"/>
+             <input placeholder="Bottom Right Text" value={infoBR} onChange={e=>setInfoBR(e.target.value)} className="field-input"/>
+          </div>
+
           <button className="btn" type="submit">Upload</button>
         </form>
 

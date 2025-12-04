@@ -36,6 +36,7 @@ function ViewerPage() {
   if (error) return <div className="viewer-skeleton error">{error}</div>;
 
   return (
+    <>
     <div className="viewer-page">
       <header className="viewer-header">
         <div className="brand">
@@ -55,7 +56,7 @@ function ViewerPage() {
       <main className="viewer-main">
         <div className="viewer-left">
           <div className="viewer-card">
-            <ModelViewer modelUrl={model.url} />
+            <ModelViewer modelUrl={model.url} info={model.info} />
           </div>
         </div>
 
@@ -67,6 +68,7 @@ function ViewerPage() {
         </aside>
       </main>
     </div>
+    </>
   );
 }
 
