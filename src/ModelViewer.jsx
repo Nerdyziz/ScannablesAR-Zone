@@ -147,7 +147,7 @@ export default function ModelViewer({ modelUrl, info }) {
 // === RESPONSIVE STYLE HELPER ===
 const boxStyle = (pos) => ({
   position: 'absolute',
-  width: '38%', 
+  width: '20%', 
   maxWidth: '160px',
   minHeight: '30px',
   padding: '8px',
