@@ -190,8 +190,6 @@ function ViewerPage() {
 
         /* === MOBILE LAYOUT (Max-width: 768px) === */
         @media (max-width: 768px) {
-         .section-wrapper.left { justify-content: flex-start; padding-left: 10%; }
-          .section-wrapper.right { justify-content: flex-end; padding-right: 10%; }
           .section-wrapper {
             align-items: flex-end; /* Push text to bottom */
             justify-content: center !important; /* Always center horizontally */
@@ -199,10 +197,10 @@ function ViewerPage() {
           }
 
           .text-card {
-            width: 50%;      /* Full width on mobile */
+            width: 100%;      /* Full width on mobile */
             max-width: 90%;   /* Slight margin */
-            border-top: none;
-            border-left: 4px solid blue; /* Move accent to top */
+            border-left: none;
+            border-top: 4px solid blue; /* Move accent to top */
             text-align: left;
             background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5)); /* Gradient fade */
           }
