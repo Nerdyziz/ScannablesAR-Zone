@@ -28,6 +28,8 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
         // 3. Enable Zoom/Pan
         camera-controls={enableInteractions}
         auto-rotate={enableInteractions}
+        auto-rotate-delay="0"
+        rotation-per-second="-60deg"
         
         // If interactive, use "auto" (default). If scrolling, use the specific angle.
         camera-orbit={enableInteractions ? "auto auto auto" : (cameraOrbit || "0deg 75deg 105%")}
