@@ -58,14 +58,22 @@ export default function ModelViewer({ modelUrl, info }) {
         alt="A 3D model"
         ar
         ar-modes="webxr scene-viewer quick-look"
-        camera-controls
+        
+        /* === 1. LOCK & RESET LOGIC === 
+           - camera-controls: Removed when paused (disables user rotation/zoom).
+           - camera-orbit: Snaps to front view (0deg 75deg) when paused. 
+             'auto' allows user control when unpaused.
+           - interpolation-decay: Ensures the move to '0deg' is smooth.
+        */
+        camera-controls={!isPaused ? true : undefined}
+        camera-orbit={isPaused ? "0deg 75deg 105%" : "auto auto auto"}
+        interpolation-decay="200"
         
         auto-rotate={!isPaused} 
         auto-rotate-delay="0"
         rotation-per-second="-60deg"
         
         disable-pan 
-        // Zoom enabled
         
         shadow-intensity="1"
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
@@ -89,42 +97,41 @@ export default function ModelViewer({ modelUrl, info }) {
       </model-viewer>
 
       {/* --- POPUP OVERLAY --- */}
-      {isPaused && (
-        <div style={{
-          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-          zIndex: 10, pointerEvents: 'none'
-        }}>
-          
-          {/* SVG Lines - Updated to start from "Corners" of the model area (40%/60%) instead of center (50%) */}
-          <svg style={{ width: '100%', height: '100%', position: 'absolute' }}>
-             {/* Top Left: Starts at 42%, 40% (Top-Left of center) -> Goes to Box */}
-             <line x1="42%" y1="40%" x2="15%" y2="15%" stroke="blue" strokeWidth="2" />
-             
-             {/* Top Right: Starts at 58%, 40% (Top-Right of center) -> Goes to Box */}
-             <line x1="58%" y1="40%" x2="85%" y2="15%" stroke="blue" strokeWidth="2" />
-             
-             {/* Bottom Left: Starts at 42%, 60% (Bottom-Left of center) -> Goes to Box */}
-             <line x1="42%" y1="60%" x2="15%" y2="85%" stroke="blue" strokeWidth="2" />
-             
-             {/* Bottom Right: Starts at 58%, 60% (Bottom-Right of center) -> Goes to Box */}
-             <line x1="58%" y1="60%" x2="85%" y2="85%" stroke="blue" strokeWidth="2" />
-          </svg>
+      {/* === 2. SMOOTH TRANSITION LOGIC ===
+         - Always rendered in DOM.
+         - Opacity controls visibility.
+         - CSS Transition handles the fade effect.
+      */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+        zIndex: 10, 
+        pointerEvents: 'none',
+        opacity: isPaused ? 1 : 0,           // Fade in/out
+        transition: 'opacity 0.5s ease-out'  // Smoothness duration
+      }}>
+        
+        {/* SVG Lines */}
+        <svg style={{ width: '100%', height: '100%', position: 'absolute' }}>
+           <line x1="42%" y1="40%" x2="15%" y2="15%" stroke="blue" strokeWidth="2" />
+           <line x1="58%" y1="40%" x2="85%" y2="15%" stroke="blue" strokeWidth="2" />
+           <line x1="42%" y1="60%" x2="15%" y2="85%" stroke="blue" strokeWidth="2" />
+           <line x1="58%" y1="60%" x2="85%" y2="85%" stroke="blue" strokeWidth="2" />
+        </svg>
 
-          {/* BOXES */}
-          <div style={boxStyle({ top: '10%', left: '5%' })}>
-            {info?.tl || ''}
-          </div>
-          <div style={boxStyle({ top: '10%', right: '5%' })}>
-             {info?.tr || ''}
-          </div>
-          <div style={boxStyle({ bottom: '10%', left: '5%' })}>
-             {info?.bl || ''}
-          </div>
-          <div style={boxStyle({ bottom: '10%', right: '5%' })}>
-             {info?.br || ''}
-          </div>
+        {/* BOXES */}
+        <div style={boxStyle({ top: '10%', left: '5%' })}>
+          {info?.tl || ''}
         </div>
-      )}
+        <div style={boxStyle({ top: '10%', right: '5%' })}>
+           {info?.tr || ''}
+        </div>
+        <div style={boxStyle({ bottom: '10%', left: '5%' })}>
+           {info?.bl || ''}
+        </div>
+        <div style={boxStyle({ bottom: '10%', right: '5%' })}>
+           {info?.br || ''}
+        </div>
+      </div>
     </div>
   );
 }
@@ -144,13 +151,11 @@ const boxStyle = (pos) => ({
   textAlign: 'center',
   pointerEvents: 'auto',
   
-  // === FUTURISTIC FONT ===
   fontFamily: '"Orbitron", sans-serif', 
   letterSpacing: '1px',
   textTransform: 'uppercase',
-  // =======================
 
-  fontSize: 'clamp(10px, 2.5vw, 13px)', // Slightly smaller to fit uppercase text
+  fontSize: 'clamp(10px, 2.5vw, 13px)', 
   fontWeight: '700',
   boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
   
