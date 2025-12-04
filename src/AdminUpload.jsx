@@ -12,7 +12,7 @@ export default function AdminUpload() {
   const [loading, setLoading] = useState(false);
   const [lastCreatedLink, setLastCreatedLink] = useState('');
 
-
+  // --- 4 CORNERS STATE ---
   const [infoTL, setInfoTL] = useState('');
   const [infoTR, setInfoTR] = useState('');
   const [infoBL, setInfoBL] = useState('');
@@ -50,7 +50,7 @@ export default function AdminUpload() {
     const fd = new FormData();
     fd.append('modelFile', file);
     
-    // --- APPEND TEXT DATA ---
+    // Append Text Data
     fd.append('infoTL', infoTL);
     fd.append('infoTR', infoTR);
     fd.append('infoBL', infoBL);
@@ -63,12 +63,9 @@ export default function AdminUpload() {
         body: fd
       });
 
-      // read raw text in case backend returns non-JSON
       const text = await res.text();
       let payload;
       try { payload = JSON.parse(text); } catch { payload = { raw: text }; }
-
-      console.log('Upload response:', res.status, payload);
 
       if (!res.ok) {
         const err = payload.error || payload.message || payload.raw || `HTTP ${res.status}`;
@@ -93,7 +90,6 @@ export default function AdminUpload() {
         setLastCreatedLink(viewLink);
         setMessage('Upload successful — link created below.');
         setFile(null);
-        // Reset text fields
         setInfoTL(''); setInfoTR(''); setInfoBL(''); setInfoBR('');
         return;
       }
@@ -135,53 +131,88 @@ export default function AdminUpload() {
 
   return (
     <div className="admin-wrap">
-      <div className="admin-card">
+      {/* --- LEFT SIDE: UPLOAD CARD --- */}
+      <div className="admin-card" style={{ minWidth: '350px' }}>
         <h2>Admin — Upload 3D Model</h2>
 
-        <label className="field">
-          Admin Key
+        <div style={{ marginBottom: '15px' }}>
+          <label className="field" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+            Admin Key
+          </label>
           <input
             type="password"
+            className="field-input"
+            style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
             value={adminKey}
             onChange={e => setAdminKey(e.target.value)}
             placeholder="Enter admin token"
           />
-        </label>
+        </div>
 
         {lastCreatedLink && (
-          <div className="created-link">
-            <strong>Shareable Link:</strong>{' '}
-            <a href={lastCreatedLink} target="_blank" rel="noreferrer">{lastCreatedLink}</a>
-            <button className="btn small" onClick={() => copyToClipboard(lastCreatedLink)} style={{ marginLeft: 8 }}>
-              Copy
-            </button>
+          <div className="created-link" style={{ wordBreak: 'break-all', marginBottom: '15px' }}>
+            <strong>Link:</strong> <a href={lastCreatedLink} target="_blank" rel="noreferrer">{lastCreatedLink}</a>
+            <div style={{ marginTop: '5px' }}>
+              <button className="btn small" onClick={() => copyToClipboard(lastCreatedLink)}>Copy</button>
+            </div>
           </div>
         )}
 
-        <form onSubmit={handleUpload} className="upload-form">
-          <input
-            type="file"
-            accept=".glb,.gltf"
-            onChange={e => {
-              setFile(e.target.files[0]);
-              setMessage('');
-            }}
-          />
+        {/* --- FORM WITH CLEAN VERTICAL LAYOUT --- */}
+        <form onSubmit={handleUpload} className="upload-form" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           
-          {/* --- NEW INPUTS FOR 4 CORNERS --- */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px', marginBottom: '10px' }}>
-             <input placeholder="Top Left Text" value={infoTL} onChange={e=>setInfoTL(e.target.value)} className="field-input"/>
-             <input placeholder="Top Right Text" value={infoTR} onChange={e=>setInfoTR(e.target.value)} className="field-input"/>
-             <input placeholder="Bottom Left Text" value={infoBL} onChange={e=>setInfoBL(e.target.value)} className="field-input"/>
-             <input placeholder="Bottom Right Text" value={infoBR} onChange={e=>setInfoBR(e.target.value)} className="field-input"/>
+          {/* 1. File Input */}
+          <div>
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', opacity: 0.9 }}>1. Select Model</label>
+            <input
+              type="file"
+              accept=".glb,.gltf"
+              onChange={e => {
+                setFile(e.target.files[0]);
+                setMessage('');
+              }}
+              style={{ width: '100%' }}
+            />
+          </div>
+          
+          {/* 2. Text Inputs Grid */}
+          <div>
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', opacity: 0.9 }}>2. Corner Details (Optional)</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+               <input 
+                 placeholder="Top Left" 
+                 value={infoTL} onChange={e=>setInfoTL(e.target.value)} 
+                 className="field-input"
+                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
+               />
+               <input 
+                 placeholder="Top Right" 
+                 value={infoTR} onChange={e=>setInfoTR(e.target.value)} 
+                 className="field-input"
+                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
+               />
+               <input 
+                 placeholder="Bottom Left" 
+                 value={infoBL} onChange={e=>setInfoBL(e.target.value)} 
+                 className="field-input"
+                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
+               />
+               <input 
+                 placeholder="Bottom Right" 
+                 value={infoBR} onChange={e=>setInfoBR(e.target.value)} 
+                 className="field-input"
+                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
+               />
+            </div>
           </div>
 
-          <button className="btn" type="submit">Upload</button>
+          <button className="btn" type="submit" style={{ width: '100%', padding: '10px' }}>Upload Model</button>
         </form>
 
-        <p className="message">{message}</p>
+        <p className="message" style={{ marginTop: '15px' }}>{message}</p>
       </div>
 
+      {/* --- RIGHT SIDE: MODELS GRID --- */}
       <div className="models-grid">
         <h3>Your models</h3>
         {loading && <p>Loading...</p>}
