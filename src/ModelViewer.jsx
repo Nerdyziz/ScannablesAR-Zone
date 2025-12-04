@@ -8,14 +8,11 @@ export default function ModelViewer({ modelUrl, info }) {
 
   // --- DOUBLE TAP LOGIC ---
   const handleDoubleTapDetector = (e) => {
-    // We do NOT prevent default here so gestures like pinch-to-zoom still work 
-    // for the model-viewer, but we capture the tap timing.
-    
+    // allow zooming (no preventDefault), but track taps
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300; 
 
     if (now - lastClickRef.current < DOUBLE_TAP_DELAY) {
-      // Toggle popup on double tap
       setIsPaused(prevState => !prevState);
       lastClickRef.current = 0;
     } else {
@@ -46,13 +43,16 @@ export default function ModelViewer({ modelUrl, info }) {
         height: '100%', 
         position: 'relative', 
         overflow: 'hidden',
-        // touch-action: none allows the model-viewer to handle pinch-zoom 
-        // without the browser zooming the whole page
         touchAction: 'none', 
         cursor: 'pointer'
       }}
       onClick={handleDoubleTapDetector}
     >
+      {/* Import Futuristic Font */}
+      <style>
+        {`@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');`}
+      </style>
+
       <model-viewer
         src={modelUrl}
         alt="A 3D model"
@@ -60,13 +60,12 @@ export default function ModelViewer({ modelUrl, info }) {
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
         
-        // PAUSE ROTATION WHEN POPUP IS OPEN
         auto-rotate={!isPaused} 
         auto-rotate-delay="0"
         rotation-per-second="-60deg"
         
         disable-pan 
-        // REMOVED 'disable-zoom' TO ENABLE ZOOMING
+        // Zoom enabled
         
         shadow-intensity="1"
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
@@ -95,12 +94,20 @@ export default function ModelViewer({ modelUrl, info }) {
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
           zIndex: 10, pointerEvents: 'none'
         }}>
-          {/* SVG Lines */}
+          
+          {/* SVG Lines - Updated to start from "Corners" of the model area (40%/60%) instead of center (50%) */}
           <svg style={{ width: '100%', height: '100%', position: 'absolute' }}>
-             <line x1="50%" y1="50%" x2="15%" y2="15%" stroke="blue" strokeWidth="2" />
-             <line x1="50%" y1="50%" x2="85%" y2="15%" stroke="blue" strokeWidth="2" />
-             <line x1="50%" y1="50%" x2="15%" y2="85%" stroke="blue" strokeWidth="2" />
-             <line x1="50%" y1="50%" x2="85%" y2="85%" stroke="blue" strokeWidth="2" />
+             {/* Top Left: Starts at 42%, 40% (Top-Left of center) -> Goes to Box */}
+             <line x1="42%" y1="40%" x2="15%" y2="15%" stroke="blue" strokeWidth="2" />
+             
+             {/* Top Right: Starts at 58%, 40% (Top-Right of center) -> Goes to Box */}
+             <line x1="58%" y1="40%" x2="85%" y2="15%" stroke="blue" strokeWidth="2" />
+             
+             {/* Bottom Left: Starts at 42%, 60% (Bottom-Left of center) -> Goes to Box */}
+             <line x1="42%" y1="60%" x2="15%" y2="85%" stroke="blue" strokeWidth="2" />
+             
+             {/* Bottom Right: Starts at 58%, 60% (Bottom-Right of center) -> Goes to Box */}
+             <line x1="58%" y1="60%" x2="85%" y2="85%" stroke="blue" strokeWidth="2" />
           </svg>
 
           {/* BOXES */}
@@ -125,31 +132,29 @@ export default function ModelViewer({ modelUrl, info }) {
 // === RESPONSIVE STYLE HELPER ===
 const boxStyle = (pos) => ({
   position: 'absolute',
-  
-  // Responsive Width: 
-  // - 38% ensures two boxes fit side-by-side on mobile (38+38=76%)
-  // - maxWidth keeps them from looking huge on desktop
   width: '38%', 
   maxWidth: '160px',
-  
   minHeight: '30px',
   padding: '8px',
   
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  backgroundColor: 'rgba(0,0,0, 0.5)',
   color: 'blue',
   border: '2px solid blue',
   borderRadius: '4px',
   textAlign: 'center',
   pointerEvents: 'auto',
   
-  // Responsive Font: Clamps between 11px and 14px based on viewport width
-  fontSize: 'clamp(11px, 2.5vw, 14px)',
-  fontWeight: 'bold',
+  // === FUTURISTIC FONT ===
+  fontFamily: '"Orbitron", sans-serif', 
+  letterSpacing: '1px',
+  textTransform: 'uppercase',
+  // =======================
+
+  fontSize: 'clamp(10px, 2.5vw, 13px)', // Slightly smaller to fit uppercase text
+  fontWeight: '700',
   boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
   
-  // Flex centering
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   
-  // Merge the specific position (top/left/etc)
   ...pos
 });
