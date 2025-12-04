@@ -60,19 +60,24 @@ export default function ModelViewer({ modelUrl, info }) {
         ar-modes="webxr scene-viewer quick-look"
         
         /* === LOCK & RESET LOGIC === 
-           - camera-controls: Removed when paused (true/undefined toggle).
            
-           - camera-orbit:
-              * PAUSED: "0deg 75deg auto" 
-                -> 0deg: Front view (Azimuth)
-                -> 75deg: Standard default angle (Inclination)
-                -> auto: Matches the INITIAL LOAD zoom distance (Fixes the "zoom out" bug)
-              * UNPAUSED: "auto auto auto" -> Allows free movement
-              
-           - interpolation-decay: smooths the movement to the reset position
+           1. camera-controls: 
+              - When PAUSED (popup open): undefined (Removes controls so user can't move it)
+              - When UNPAUSED: true (Allows user to rotate/zoom)
+           
+           2. camera-orbit:
+              - PAUSED: "0deg 75deg 105%" 
+                * 0deg = Exact Front
+                * 75deg = Default Height
+                * 105% = EXACT DEFAULT ZOOM (Fixes the "zoom out" bug)
+              - UNPAUSED: "auto auto auto" (User controls)
+
+           3. camera-target:
+              - Always "auto auto auto" to ensure it looks at the center of the model.
         */
         camera-controls={!isPaused ? true : undefined}
-        camera-orbit={isPaused ? "0deg 75deg auto" : "auto auto auto"}
+        camera-orbit={isPaused ? "0deg 75deg 105%" : "auto auto auto"}
+        camera-target="auto auto auto"
         interpolation-decay="200"
         
         // Auto-rotate stops when paused
@@ -80,6 +85,7 @@ export default function ModelViewer({ modelUrl, info }) {
         auto-rotate-delay="0"
         rotation-per-second="-60deg"
         
+        // Disable panning so the model always stays centered
         disable-pan 
         
         shadow-intensity="1"
