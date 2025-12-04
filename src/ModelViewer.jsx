@@ -60,32 +60,18 @@ export default function ModelViewer({ modelUrl, info }) {
         ar-modes="webxr scene-viewer quick-look"
         
         /* === LOCK & RESET LOGIC === 
-           
-           1. camera-controls: 
-              - When PAUSED (popup open): undefined (Removes controls so user can't move it)
-              - When UNPAUSED: true (Allows user to rotate/zoom)
-           
-           2. camera-orbit:
-              - PAUSED: "0deg 75deg 105%" 
-                * 0deg = Exact Front
-                * 75deg = Default Height
-                * 105% = EXACT DEFAULT ZOOM (Fixes the "zoom out" bug)
-              - UNPAUSED: "auto auto auto" (User controls)
-
-           3. camera-target:
-              - Always "auto auto auto" to ensure it looks at the center of the model.
+           - PAUSED: "0deg 75deg 105%" (Front View, Default Height, Default Zoom 105%)
+           - UNPAUSED: "auto auto auto" (Free control)
         */
         camera-controls={!isPaused ? true : undefined}
         camera-orbit={isPaused ? "0deg 75deg 105%" : "auto auto auto"}
         camera-target="auto auto auto"
         interpolation-decay="200"
         
-        // Auto-rotate stops when paused
         auto-rotate={!isPaused} 
         auto-rotate-delay="0"
         rotation-per-second="-60deg"
         
-        // Disable panning so the model always stays centered
         disable-pan 
         
         shadow-intensity="1"
@@ -114,8 +100,21 @@ export default function ModelViewer({ modelUrl, info }) {
         position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
         zIndex: 10, 
         pointerEvents: 'none',
+
+        // === NEW ANIMATION LOGIC ===
+        // 1. Opacity: Fades in/out
         opacity: isPaused ? 1 : 0,           
-        transition: 'opacity 0.5s ease-out'  
+        
+        // 2. Transform: 
+        //    - scale(1) = Full Size (Open)
+        //    - scale(0.1) = Tiny dot in center (Closed/Inside Model)
+        transform: isPaused ? 'scale(1)' : 'scale(0.1)',
+        
+        // 3. Origin: Ensures it grows from the CENTER of the screen
+        transformOrigin: 'center center',
+        
+        // 4. Transition: Smooth cubic-bezier for a "Sci-Fi Pop" effect
+        transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
       }}>
         
         {/* SVG Lines */}
@@ -147,7 +146,7 @@ export default function ModelViewer({ modelUrl, info }) {
 // === RESPONSIVE STYLE HELPER ===
 const boxStyle = (pos) => ({
   position: 'absolute',
-  width: '20%', 
+  width: '38%', 
   maxWidth: '160px',
   minHeight: '30px',
   padding: '8px',
