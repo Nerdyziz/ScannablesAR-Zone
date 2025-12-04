@@ -59,17 +59,20 @@ export default function ModelViewer({ modelUrl, info }) {
         ar
         ar-modes="webxr scene-viewer quick-look"
         
-        /* === 1. LOCK & RESET LOGIC === 
-           - camera-controls: Removed when paused to disable user interaction.
-           - camera-orbit: 
-              * PAUSED: "0deg 75deg 105%" -> Resets Angle (0deg), Tilt (75deg), and Zoom (105%)
+        /* === LOCK & RESET LOGIC === 
+           - camera-controls: Removed when paused (true/undefined toggle).
+           
+           - camera-orbit:
+              * PAUSED: "0deg 75deg auto" 
+                -> 0deg: Front view (Azimuth)
+                -> 75deg: Standard default angle (Inclination)
+                -> auto: Matches the INITIAL LOAD zoom distance (Fixes the "zoom out" bug)
               * UNPAUSED: "auto auto auto" -> Allows free movement
-           - camera-target:
-              * PAUSED: "auto auto auto" -> Forces the camera to look at the center of the model (Resets Panning)
+              
+           - interpolation-decay: smooths the movement to the reset position
         */
         camera-controls={!isPaused ? true : undefined}
-        camera-orbit={isPaused ? "0deg 75deg 105%" : "auto auto auto"}
-        camera-target="auto auto auto" 
+        camera-orbit={isPaused ? "0deg 75deg auto" : "auto auto auto"}
         interpolation-decay="200"
         
         // Auto-rotate stops when paused
