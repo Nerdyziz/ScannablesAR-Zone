@@ -59,18 +59,17 @@ export default function ModelViewer({ modelUrl, info }) {
         ar
         ar-modes="webxr scene-viewer quick-look"
         
-        /* === LOCK & RESET LOGIC === 
-           - camera-controls: Removed when paused to disable manual interaction.
+        /* === 1. LOCK & RESET LOGIC === 
+           - camera-controls: Removed when paused to disable user interaction.
            - camera-orbit: 
-              * UNPAUSED: "auto auto auto" (User controls + Auto Rotate)
-              * PAUSED: "0deg 75deg auto" 
-                - 0deg = Front (Default Azimuth)
-                - 75deg = Standard Angle (Default Inclination)
-                - auto = Default Zoom/Distance
-           - interpolation-decay: Controls how fast/smooth the camera moves to the new orbit.
+              * PAUSED: "0deg 75deg 105%" -> Resets Angle (0deg), Tilt (75deg), and Zoom (105%)
+              * UNPAUSED: "auto auto auto" -> Allows free movement
+           - camera-target:
+              * PAUSED: "auto auto auto" -> Forces the camera to look at the center of the model (Resets Panning)
         */
         camera-controls={!isPaused ? true : undefined}
-        camera-orbit={isPaused ? "0deg 75deg auto" : "auto auto auto"}
+        camera-orbit={isPaused ? "0deg 75deg 105%" : "auto auto auto"}
+        camera-target="auto auto auto" 
         interpolation-decay="200"
         
         // Auto-rotate stops when paused
@@ -106,8 +105,8 @@ export default function ModelViewer({ modelUrl, info }) {
         position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
         zIndex: 10, 
         pointerEvents: 'none',
-        opacity: isPaused ? 1 : 0,           // Fade in/out
-        transition: 'opacity 0.5s ease-out'  // Smooth transition
+        opacity: isPaused ? 1 : 0,           
+        transition: 'opacity 0.5s ease-out'  
       }}>
         
         {/* SVG Lines */}
