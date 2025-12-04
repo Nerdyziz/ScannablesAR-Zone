@@ -1,4 +1,3 @@
-// frontend/src/ModelViewer.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import '@google/model-viewer';
 
@@ -9,15 +8,14 @@ export default function ModelViewer({ modelUrl, info }) {
 
   // --- DOUBLE TAP LOGIC ---
   const handleDoubleTapDetector = (e) => {
-    // Prevent zoom issues on some devices
-    if (e.type === 'touchstart') {
-       // e.preventDefault(); 
-    }
-
+    // We do NOT prevent default here so gestures like pinch-to-zoom still work 
+    // for the model-viewer, but we capture the tap timing.
+    
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300; 
 
     if (now - lastClickRef.current < DOUBLE_TAP_DELAY) {
+      // Toggle popup on double tap
       setIsPaused(prevState => !prevState);
       lastClickRef.current = 0;
     } else {
@@ -48,6 +46,8 @@ export default function ModelViewer({ modelUrl, info }) {
         height: '100%', 
         position: 'relative', 
         overflow: 'hidden',
+        // touch-action: none allows the model-viewer to handle pinch-zoom 
+        // without the browser zooming the whole page
         touchAction: 'none', 
         cursor: 'pointer'
       }}
@@ -59,11 +59,15 @@ export default function ModelViewer({ modelUrl, info }) {
         ar
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
+        
+        // PAUSE ROTATION WHEN POPUP IS OPEN
         auto-rotate={!isPaused} 
         auto-rotate-delay="0"
         rotation-per-second="-60deg"
+        
         disable-pan 
-        disable-zoom
+        // REMOVED 'disable-zoom' TO ENABLE ZOOMING
+        
         shadow-intensity="1"
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
       >
@@ -118,25 +122,34 @@ export default function ModelViewer({ modelUrl, info }) {
   );
 }
 
-// Updated Helper Style
+// === RESPONSIVE STYLE HELPER ===
 const boxStyle = (pos) => ({
   position: 'absolute',
-  width: '150px',
-  minHeight: '30px',
-  padding: '10px',
   
-  // === STYLING UPDATES ===
-  backgroundColor: 'rgba(255, 255, 255, 0.7)', // Translucent White
-  color: 'blue',                               // Blue Text
-  border: '2px solid blue',                    // Blue Border
-  // =======================
-
+  // Responsive Width: 
+  // - 38% ensures two boxes fit side-by-side on mobile (38+38=76%)
+  // - maxWidth keeps them from looking huge on desktop
+  width: '38%', 
+  maxWidth: '160px',
+  
+  minHeight: '30px',
+  padding: '8px',
+  
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  color: 'blue',
+  border: '2px solid blue',
   borderRadius: '4px',
   textAlign: 'center',
   pointerEvents: 'auto',
-  fontSize: '14px',
-  fontWeight: 'bold', // Bold looks better with blue text
+  
+  // Responsive Font: Clamps between 11px and 14px based on viewport width
+  fontSize: 'clamp(11px, 2.5vw, 14px)',
+  fontWeight: 'bold',
   boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+  
+  // Flex centering
   display: 'flex', alignItems: 'center', justifyContent: 'center',
+  
+  // Merge the specific position (top/left/etc)
   ...pos
 });
