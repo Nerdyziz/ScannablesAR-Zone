@@ -25,7 +25,7 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
         camera-controls={enableInteractions}
         auto-rotate={enableInteractions}
         auto-rotate-delay="0"
-        rotation-per-second="-30deg" // Slower auto-rotate for classier feel
+        rotation-per-second="-60deg" // Slower auto-rotate for classier feel
         
         // === FIX FOR MISALIGNMENT ===
         // 1. When Interactive: Pass undefined. This lets the user/auto-rotate control the camera fully without fighting "auto".
