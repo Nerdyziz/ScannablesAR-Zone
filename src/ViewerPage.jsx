@@ -186,6 +186,11 @@ function ViewerPage() {
         @media (min-width: 769px) {
           .section-wrapper.left { justify-content: flex-start; padding-left: 10%; }
           .section-wrapper.right { justify-content: flex-end; padding-right: 10%; }
+          .section-wrapper.right .text-card {
+            border-left: none;
+            border-right: 4px solid blue;
+            text-align: right;
+          }
         }
 
         /* === MOBILE LAYOUT (Max-width: 768px) === */
@@ -197,8 +202,7 @@ function ViewerPage() {
           
           /* RESTORE LEFT/RIGHT POSITIONING ON MOBILE */
           .section-wrapper.left { justify-content: flex-start; padding-left: 15px; }
-          .section-wrapper.right { justify-content: flex-end; padding-right: 15px; border-left: none;
-            border-right: 4px solid blue;}
+          .section-wrapper.right { justify-content: flex-end; padding-right: 15px; }
 
           .text-card {
             width: 75%;      
