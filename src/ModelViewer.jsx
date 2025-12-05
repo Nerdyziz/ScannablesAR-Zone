@@ -66,7 +66,7 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
         // Auto-Rotate: Enabled in Explore mode
         auto-rotate={enableInteractions}
         auto-rotate-delay="0"
-        rotation-per-second="-30deg" // Gentle spin
+        rotation-per-second="-60deg" // Gentle spin
         
         // === ORBIT INPUT ===
         // Interactive: undefined (Let user/auto control it)
@@ -82,7 +82,7 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
         interpolation-decay="200"
         
         // Lock manual controls when in "View" mode
-        disable-pan={!enableInteractions}
+        disable-pan= 'true'
         disable-zoom={!enableInteractions}
         
         shadow-intensity="1"
