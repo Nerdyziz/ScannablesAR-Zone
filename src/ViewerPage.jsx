@@ -39,92 +39,119 @@ function ViewerPage() {
   const currentTab = tabs[activeTab];
 
   return (
-    <div className="hud-container">
+    <div className="app-container">
       
-      {/* === LAYER 1: 3D MODEL === */}
-      <div className="model-layer">
-        <ModelViewer 
-          modelUrl={model.url} 
-          cameraOrbit={currentTab.orbit}
-          enableInteractions={activeTab === 4}
-        />
-      </div>
+      {/* === SECTION 1: HEADER (Static, Solid Background) === */}
+      <header className="app-header">
+        <div className="brand">SCANNABLES <span style={{color:'#00f'}}>ARZONE</span></div>
+        <div className="meta">ID: {model.shortId}</div>
+      </header>
 
-      {/* === LAYER 2: HUD INTERFACE === */}
-      <div className="hud-layer">
+      {/* === SECTION 2: VIEWPORT (Takes remaining space) === */}
+      <main className="viewport-area">
         
-        {/* Header */}
-        <div className="hud-header">
-          <div className="brand">SCANNABLES <span style={{color:'#00f'}}>ARZONE</span></div>
-          <div className="meta">ID: {model.shortId}</div>
+        {/* Layer A: 3D Model */}
+        <div className="model-layer">
+          <ModelViewer 
+            modelUrl={model.url} 
+            cameraOrbit={currentTab.orbit}
+            enableInteractions={activeTab === 4}
+          />
         </div>
 
-        {/* Info Terminal - TOP LEFT */}
-        {activeTab !== 4 && (
-          <div className="info-terminal-wrapper">
-            <div className="info-terminal">
-              <div className="terminal-header"><span className="blink">●</span> LIVE DATA</div>
-              <h3>{currentTab.title}</h3>
-              <p key={activeTab} className="typewriter">{currentTab.text}</p>
+        {/* Layer B: UI Overlay (Info + Buttons) */}
+        <div className="ui-layer">
+          
+          {/* Info Terminal */}
+          {activeTab !== 4 && (
+            <div className="info-terminal-wrapper">
+              <div className="info-terminal">
+                <div className="terminal-header"><span className="blink">●</span> LIVE DATA</div>
+                <h3>{currentTab.title}</h3>
+                <p key={activeTab} className="typewriter">{currentTab.text}</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Control Dock - BOTTOM */}
-        <div className="control-dock">
-           <div className="dock-grid">
-              {tabs.map((tab, index) => (
-                <button 
-                  key={tab.id}
-                  className={`dock-btn ${activeTab === index ? 'active' : ''}`}
-                  onClick={() => setActiveTab(index)}
-                >
-                  {tab.label}
-                </button>
-              ))}
-           </div>
+          {/* Control Dock */}
+          <div className="control-dock">
+             <div className="dock-grid">
+                {tabs.map((tab, index) => (
+                  <button 
+                    key={tab.id}
+                    className={`dock-btn ${activeTab === index ? 'active' : ''}`}
+                    onClick={() => setActiveTab(index)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+             </div>
+          </div>
         </div>
 
-      </div>
+      </main>
 
       {/* === CSS STYLES === */}
       <style>{`
-        /* --- GLOBAL --- */
+        /* --- GLOBAL & LAYOUT --- */
         :root {
             --primary: #0000ff;
             --bg-dark: #050505;
             --glass: rgba(0, 0, 0, 0.4); 
             --border: rgba(255, 255, 255, 0.15);
         }
+        * { box-sizing: border-box; }
         body { margin: 0; background: var(--bg-dark); overflow: hidden; font-family: 'Orbitron', sans-serif; }
         
-        .hud-container { width: 100vw; height: 100vh; height: 100dvh; position: relative; }
-        .model-layer { width: 100%; height: 100%; position: absolute; z-index: 0; }
-        .hud-layer { width: 100%; height: 100%; position: absolute; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between;}
+        /* Flex Container for Vertical Stacking */
+        .app-container { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100dvh; 
+            width: 100vw;
+        }
 
-        /* --- HEADER --- */
-        .hud-header {
+        /* --- HEADER (Fixed Height, Solid) --- */
+        .app-header {
+          flex: 0 0 auto; /* Don't shrink */
           padding: 15px 20px; 
           display: flex; justify-content: space-between; align-items: center;
+          background: var(--bg-dark); /* Solid background now */
+          
           color: white; letter-spacing: 1px; 
-          /* CRITICAL FIX: Only children catch clicks, header background passes through */
-          pointer-events: none; 
-          background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-          flex-shrink: 0;
-          z-index: 20;
+          z-index: 30;
         }
-        .brand, .meta { pointer-events: auto; } /* Re-enable clicks on text */
-        
         .brand { font-size: 1.1rem; font-weight: 700; }
         .meta { font-size: 0.8rem; opacity: 0.7; color: var(--primary); font-family: monospace; }
 
-        /* --- LOADING / ERROR --- */
-        .loading-screen, .error-screen { height: 100dvh; display: flex; justify-content: center; align-items: center; background: var(--bg-dark); color: white; letter-spacing: 2px; }
+        /* --- VIEWPORT (Fills remaining space) --- */
+        .viewport-area {
+            flex: 1; /* Take all remaining height */
+            position: relative; /* Context for absolute children */
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Layers inside Viewport */
+        .model-layer, .ui-layer { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+        }
+        .model-layer { z-index: 1; }
+        .ui-layer { 
+            z-index: 10; 
+            pointer-events: none; /* Let clicks pass to model */
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        /* --- UI ELEMENTS --- */
+        .loading-screen, .error-screen { height: 100%; display: flex; justify-content: center; align-items: center; background: var(--bg-dark); color: white; letter-spacing: 2px; }
         .error-screen { color: #ff3333; }
 
-        /* --- INFO TERMINAL --- */
+        /* Info Terminal */
         .info-terminal-wrapper {
-            position: absolute; top: 25%; left: 5%; pointer-events: none; 
+            position: absolute; top: 20px; left: 20px; pointer-events: none; 
         }
         .info-terminal {
           width: 300px; background: var(--glass);
@@ -137,11 +164,12 @@ function ViewerPage() {
         .terminal-header { font-size: 0.65rem; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; font-weight: bold;}
         .blink { animation: blink 1s infinite; color: var(--primary); }
 
-        /* --- CONTROL DOCK --- */
+        /* Control Dock */
         .control-dock {
-          width: 100%; padding: 15px 0 25px 0;
+          position: absolute; bottom: 0; width: 100%;
+          padding: 15px 0 25px 0;
           background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-          pointer-events: auto; z-index: 20;
+          pointer-events: auto;
         }
         .dock-grid { display: flex; justify-content: center; gap: 10px; }
         
@@ -166,10 +194,10 @@ function ViewerPage() {
         @media (max-width: 768px) {
           .meta { display: none; }
           
-          /* 1. INFO CARD: TOP LEFT */
+          /* 1. INFO CARD: Position relative to Viewport (Top Left) */
           .info-terminal-wrapper {
-            position: absolute; top: 60px; left: 0; width: 100%;
-            display: flex; justify-content: flex-start; padding: 0 15px; box-sizing: border-box;
+            top: 10px; left: 0; width: 100%;
+            display: flex; justify-content: flex-start; padding: 0 15px; 
           }
           .info-terminal {
             width: 100%; max-width: 280px; background: rgba(0, 0, 0, 0.6);
@@ -178,7 +206,7 @@ function ViewerPage() {
           .info-terminal h3 { font-size: 0.9rem; }
           .info-terminal p { font-size: 0.75rem; line-height: 1.3; }
 
-          /* 2. DOCK: COMPACT GRID */
+          /* 2. DOCK: Compact Grid */
           .control-dock {
             padding: 10px 5px 5px 5px; 
             padding-bottom: max(5px, env(safe-area-inset-bottom));
@@ -188,8 +216,10 @@ function ViewerPage() {
             display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%;
           }
           .dock-btn {
-            padding: 12px 0; font-size: 0.60rem; text-align: center;
-            width: 100%; display: flex; justify-content: center; align-items: center;
+            padding: 12px 0; 
+            font-size: 3.5vw; max-font-size: 0.75rem;
+            text-align: center; width: 100%; min-width: 0;
+            display: flex; justify-content: center; align-items: center;
             clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
           }
         }
