@@ -6,11 +6,11 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function ViewerPage() {
   const [model, setModel] = useState(null);
-  const [activeSection, setActiveSection] = useState(0);
+  const [activeTab, setActiveTab] = useState(0); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // 1. Fetch Model
+  // 1. Fetch Model Data
   useEffect(() => {
     const shortId = window.location.pathname.split('/').pop();
     fetch(`${API}/api/models/${shortId}`)
@@ -26,153 +26,197 @@ function ViewerPage() {
       });
   }, []);
 
-  // 2. Handle Scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + (window.innerHeight / 2); 
-      const sectionIndex = Math.floor(scrollPosition / window.innerHeight);
-      const safeIndex = Math.max(0, Math.min(sectionIndex, 4));
-      setActiveSection(safeIndex);
-    };
+  if (loading) return <div style={{color:'white', padding:'20px', background:'#050505', height:'100vh'}}>Loading Model...</div>;
+  if (error) return <div style={{color:'red', padding:'20px', background:'#050505', height:'100vh'}}>Error: {error}</div>;
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  if (loading) return <div style={{color:'white', padding:'20px'}}>Loading Model...</div>;
-  if (error) return <div style={{color:'red', padding:'20px'}}>Error: {error}</div>;
-
-  // Map Admin Text to Sections + Add Final "Free Roam" Section
-  const sections = [
-    { id: 0, label: "FRONT VIEW", text: model.info?.tl || "Detailed Front Profile", orbit: "0deg 75deg 105%" },
-    { id: 1, label: "SIDE PROFILE", text: model.info?.tr || "Sleek Side Silhouette", orbit: "90deg 75deg 105%" },
-    { id: 2, label: "BACK DESIGN", text: model.info?.bl || "Signature Back Details", orbit: "180deg 75deg 105%" },
-    { id: 3, label: "FABRIC & MATERIAL", text: model.info?.br || "Premium Quality Material", orbit: "0deg 30deg 60%" },
-    // === NEW 5TH SECTION ===
-    { id: 4, label: "INTERACTIVE MODE", text: "Touch to Rotate, Zoom & Explore.", orbit: null } 
+  const tabs = [
+    { id: 0, label: "FRONT", title: "FRONT PROFILE", text: model.info?.tl || "Detailed Front Profile", orbit: "0deg 75deg 105%" },
+    { id: 1, label: "SIDE", title: "SIDE SILHOUETTE", text: model.info?.tr || "Sleek Side Silhouette", orbit: "90deg 75deg 105%" },
+    { id: 2, label: "BACK", title: "BACK DETAILS", text: model.info?.bl || "Signature Back Details", orbit: "180deg 75deg 105%" },
+    { id: 3, label: "FABRIC", title: "MATERIAL ZOOM", text: model.info?.br || "Premium Quality Material", orbit: "0deg 30deg 60%" },
+    { id: 4, label: "EXPLORE", title: "INTERACTIVE MODE", text: "Touch & Drag to rotate.", orbit: null } 
   ];
 
+  const currentTab = tabs[activeTab];
+
   return (
-    <div className="scrolly-container">
+    <div className="hud-container">
       
-      {/* === BACKGROUND LAYER (FIXED 3D MODEL) === */}
-      <div className="fixed-background">
+      {/* === LAYER 1: 3D MODEL === */}
+      <div className="model-layer">
         <ModelViewer 
           modelUrl={model.url} 
-          cameraOrbit={sections[activeSection].orbit}
-          // Enable interactions ONLY when we are at the last section (Index 4)
-          enableInteractions={activeSection === 4}
+          cameraOrbit={currentTab.orbit}
+          enableInteractions={activeTab === 4}
         />
+      </div>
+
+      {/* === LAYER 2: HUD INTERFACE === */}
+      <div className="hud-layer">
         
         {/* Header */}
-        <div className="overlay-header">
-          SCANNABLES <span style={{ color: '#00f' }}>ARZONE</span>
+        <div className="hud-header">
+          <div className="brand">SCANNABLES <span style={{color:'#00f'}}>ARZONE</span></div>
+          <div className="meta desktop-only">ID: {model.shortId}</div>
         </div>
-        
-        {/* Scroll Indicator (First section only) */}
-        <div className={`scroll-hint ${activeSection === 0 ? 'visible' : ''}`}>
-          ↓ SCROLL TO EXPLORE
-        </div>
-      </div>
 
-      {/* === FOREGROUND LAYER (SCROLLING TEXT) === */}
-      <div className="scroll-content">
-        {sections.map((section, index) => (
-          <div key={section.id} className={`section-wrapper ${index % 2 === 0 ? 'left' : 'right'}`}>
-            
-            {/* Text Card */}
-            <div className={`text-card ${activeSection === index ? 'active' : ''}`}>
-              <h3>0{index + 1} // {section.label}</h3>
-              <p>{section.text}</p>
-            </div>
-
+        {/* Info Terminal (Hides in Explore Mode) */}
+        {activeTab !== 4 && (
+          <div className="info-terminal">
+            <div className="terminal-header"><span className="blink">●</span> LIVE DATA</div>
+            <h3>{currentTab.title}</h3>
+            <p key={activeTab} className="typewriter">{currentTab.text}</p>
           </div>
-        ))}
+        )}
+
+        {/* Control Buttons */}
+        <div className="control-buttons-container">
+            {tabs.map((tab, index) => (
+              <button 
+                key={tab.id}
+                className={`dock-btn btn-${index} ${activeTab === index ? 'active' : ''}`}
+                onClick={() => setActiveTab(index)}
+              >
+                {tab.label}
+              </button>
+            ))}
+        </div>
+
       </div>
 
-      {/* === CSS STYLES (Responsive) === */}
+      {/* === CSS STYLES === */}
       <style>{`
-        body { margin: 0; background: #050505; overflow-x: hidden; }
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+        /* --- GLOBAL --- */
+        body { margin: 0; background: #050505; overflow: hidden; font-family: 'Orbitron', sans-serif; }
+        .hud-container { width: 100vw; height: 100vh; position: relative; }
+        .model-layer { width: 100%; height: 100%; position: absolute; z-index: 0; }
+        .hud-layer { width: 100%; height: 100%; position: absolute; z-index: 10; pointer-events: none; }
 
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-          40% {transform: translateY(-10px);}
-          60% {transform: translateY(-5px);}
+        /* --- HEADER --- */
+        .hud-header {
+          padding: 20px; display: flex; justify-content: space-between; align-items: center;
+          color: white; letter-spacing: 1px; pointer-events: auto;
+          background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
+        .brand { font-size: 1.2rem; font-weight: 700; }
+        .meta { font-size: 0.8rem; opacity: 0.7; color: #00f; }
 
-        .scrolly-container {
-          min-height: 500vh;
-          scroll-snap-type: y mandatory;
-          /* FIX: Allow touches to pass through the container */
-          pointer-events: none; 
-        }
-
-        .fixed-background {
-          position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0;
-          /* FIX: The background (model) MUST capture events */
-          pointer-events: auto; 
-        }
-
-        .scroll-content { 
-          position: relative; 
-          z-index: 1; 
-          /* FIX: Allow events to pass through this layout layer */
-          pointer-events: none; 
-        }
-
-        .overlay-header {
-          position: absolute; top: 20px; left: 20px; z-index: 10;
-          font-family: 'Orbitron', sans-serif; color: white; font-size: 1.2rem;
-          /* Enable clicks on header links if you add them later */
-          pointer-events: auto; 
-        }
-
-        .scroll-hint {
-          position: absolute; bottom: 80px; width: 100%; text-align: center;
-          color: white; font-family: 'Orbitron', sans-serif; font-size: 0.8rem;
-          opacity: 0; transition: opacity 0.5s; pointer-events: none;
-        }
-        .scroll-hint.visible { opacity: 0.7; animation: bounce 2s infinite; }
-
-        .section-wrapper {
-          height: 100vh; width: 100%; display: flex; align-items: center;
-          padding: 20px; box-sizing: border-box; scroll-snap-align: start;
-          /* FIX: Transparent wrapper shouldn't block model */
-          pointer-events: none; 
-        }
-
-        .text-card {
+        /* --- DESKTOP DEFAULT STYLES --- */
+        .info-terminal {
+          position: absolute; top: 20%; left: 5%; 
+          width: 300px;
           background: rgba(0, 0, 0, 0.6);
-          backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.1); border-left: 4px solid blue;
-          padding: 25px; max-width: 300px; color: white; font-family: 'Orbitron', sans-serif;
-          opacity: 0.3; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          
-          /* FIX: Re-enable events specifically for the text card so users can select text */
-          pointer-events: auto; 
+          backdrop-filter: blur(10px);
+          border: 1px solid #333;
+          border-left: 4px solid blue;
+          padding: 20px;
+          color: white;
+          pointer-events: auto;
+          animation: slideIn 0.5s ease-out;
         }
-        .text-card.active { opacity: 1; transform: translateY(0); }
+        .info-terminal h3 { margin: 0 0 10px 0; font-size: 1.1rem; }
+        .info-terminal p { margin: 0; font-size: 0.9rem; line-height: 1.6; opacity: 0.9; }
+        .terminal-header { font-size: 0.7rem; color: #00f; margin-bottom: 10px; }
+        .blink { animation: blink 1s infinite; }
 
-        .text-card h3 { margin: 0 0 10px 0; color: #00f; font-size: 0.9rem; letter-spacing: 1px; }
-        .text-card p { margin: 0; line-height: 1.5; font-size: clamp(1rem, 4vw, 1.2rem); }
-
-        @media (min-width: 769px) {
-          .section-wrapper.left { justify-content: flex-start; padding-left: 10%; }
-          .section-wrapper.right { justify-content: flex-end; padding-right: 10%; }
+        .control-buttons-container {
+          position: absolute; bottom: 0; width: 100%;
+          padding-bottom: 30px;
+          background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+          pointer-events: auto;
+          display: flex; justify-content: center; gap: 10px;
+          padding-top: 40px;
         }
 
+        .dock-btn {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: white;
+          padding: 12px 24px;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all 0.3s;
+          clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 30%);
+        }
+        .dock-btn:hover { background: rgba(0, 0, 255, 0.2); border-color: blue; }
+        .dock-btn.active { background: blue; color: white; border-color: blue; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+        .typewriter {
+          overflow: hidden; border-right: 2px solid blue; white-space: normal; 
+          animation: typing 2s steps(40, end), blink-caret .75s step-end infinite;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes typing { from { max-height: 0; } to { max-height: 100px; } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: blue; } }
+
+        /* === MOBILE LAYOUT (REDESIGNED) === */
         @media (max-width: 768px) {
-          .section-wrapper { align-items: flex-end; padding-bottom: 80px; }
-          .section-wrapper.left { justify-content: flex-start; padding-left: 15px; }
-          .section-wrapper.right { justify-content: flex-end; padding-right: 15px; }
+          .desktop-only { display: none; }
+          .hud-header { padding: 15px; }
 
-          .text-card {
-            width: 75%; max-width: 300px; background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5));
+          /* 1. INFO CARD: Moved to BOTTOM (Above buttons) */
+          .info-terminal {
+            top: auto; 
+            bottom: 70px; /* Sits securely above the bottom buttons */
+            left: 10px; right: 10px;
+            width: auto;
+            max-width: none;
+            padding: 12px 15px;
+            border-left: none; 
+            border-top: 2px solid blue;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.6));
+            animation: slideUp 0.5s ease-out;
           }
-          .section-wrapper.left .text-card { border-left: 4px solid blue; text-align: left; }
-          .section-wrapper.right .text-card { border-left: none; border-right: 4px solid blue; text-align: right; }
-          .overlay-header { top: 15px; left: 15px; font-size: 1rem; }
+          .info-terminal h3 { font-size: 0.9rem; margin-bottom: 4px; color: #fff; }
+          .info-terminal p { font-size: 0.8rem; line-height: 1.3; color: #ccc; }
+
+          /* 2. BUTTON CONTAINER: Full screen overlay for positioning */
+          .control-buttons-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: none; padding: 0; pointer-events: none;
+            display: block;
+          }
+
+          /* 3. BUTTON STYLES: Small, Compact, Touch-friendly */
+          .dock-btn {
+            position: absolute;
+            pointer-events: auto;
+            font-size: 0.65rem;
+            padding: 8px 12px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            clip-path: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          .dock-btn.active { background: rgba(0, 0, 255, 0.8); border-color: #00f; }
+
+          /* 4. BUTTON POSITIONS */
+          /* Top Corners */
+          .btn-0 { top: 70px; left: 15px; }   /* FRONT */
+          .btn-1 { top: 70px; right: 15px; }  /* SIDE */
+
+          /* Bottom Row (Left, Center, Right) */
+          .btn-2 { bottom: 30px; left: 15px; } /* BACK */
+          .btn-3 { bottom: 30px; right: 15px; }/* FABRIC */
+          
+          /* Explore Button (Center Bottom) */
+          .btn-4 {
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: rgba(0, 0, 255, 0.2);
+            border: 1px solid blue;
+            font-weight: bold;
+            font-size: 0.75rem;
+          }
+          .btn-4.active { background: blue; box-shadow: 0 0 15px blue; }
         }
       `}</style>
     </div>
