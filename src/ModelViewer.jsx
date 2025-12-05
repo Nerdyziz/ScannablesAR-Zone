@@ -53,7 +53,7 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
         /* Mobile Adjustment: Lift it up so it doesn't overlap the dock */
         @media (max-width: 768px) {
             .ar-button {
-                bottom: 110px; /* Clears the bottom buttons */
+                bottom: 100px; /* Clears the bottom buttons */
                 right: 15px;
                 padding: 8px 16px;
                 font-size: 0.8rem;
