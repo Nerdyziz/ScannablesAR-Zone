@@ -29,10 +29,8 @@ function ViewerPage() {
   // 2. Handle Scroll
   useEffect(() => {
     const handleScroll = () => {
-      // Calculate active section
       const scrollPosition = window.scrollY + (window.innerHeight / 2); 
       const sectionIndex = Math.floor(scrollPosition / window.innerHeight);
-      // Increased max to 4 to include the new "Free Roam" section
       const safeIndex = Math.max(0, Math.min(sectionIndex, 4));
       setActiveSection(safeIndex);
     };
@@ -104,20 +102,30 @@ function ViewerPage() {
         }
 
         .scrolly-container {
-          /* Increased height to accommodate 5 sections */
           min-height: 500vh;
-          scroll-snap-type: y mandatory; 
+          scroll-snap-type: y mandatory;
+          /* FIX: Allow touches to pass through the container */
+          pointer-events: none; 
         }
 
         .fixed-background {
           position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0;
+          /* FIX: The background (model) MUST capture events */
+          pointer-events: auto; 
         }
 
-        .scroll-content { position: relative; z-index: 1; }
+        .scroll-content { 
+          position: relative; 
+          z-index: 1; 
+          /* FIX: Allow events to pass through this layout layer */
+          pointer-events: none; 
+        }
 
         .overlay-header {
           position: absolute; top: 20px; left: 20px; z-index: 10;
           font-family: 'Orbitron', sans-serif; color: white; font-size: 1.2rem;
+          /* Enable clicks on header links if you add them later */
+          pointer-events: auto; 
         }
 
         .scroll-hint {
@@ -130,6 +138,8 @@ function ViewerPage() {
         .section-wrapper {
           height: 100vh; width: 100%; display: flex; align-items: center;
           padding: 20px; box-sizing: border-box; scroll-snap-align: start;
+          /* FIX: Transparent wrapper shouldn't block model */
+          pointer-events: none; 
         }
 
         .text-card {
@@ -138,6 +148,9 @@ function ViewerPage() {
           border: 1px solid rgba(255, 255, 255, 0.1); border-left: 4px solid blue;
           padding: 25px; max-width: 300px; color: white; font-family: 'Orbitron', sans-serif;
           opacity: 0.3; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          
+          /* FIX: Re-enable events specifically for the text card so users can select text */
+          pointer-events: auto; 
         }
         .text-card.active { opacity: 1; transform: translateY(0); }
 
