@@ -216,8 +216,8 @@ function ViewerPage() {
             display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%;
           }
           .dock-btn {
-            padding: 12px 0; 
-            font-size: 3.5vw; max-font-size: 0.75rem;
+            padding: 12px; 
+            font-size: 3vw; max-font-size: 0.75rem;
             text-align: center; width: 100%; min-width: 0;
             display: flex; justify-content: center; align-items: center;
             clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
