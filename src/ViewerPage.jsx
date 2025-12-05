@@ -9,6 +9,7 @@ function ViewerPage() {
   const [activeTab, setActiveTab] = useState(0); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
   // Detect mobile for layout adjustments
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -79,7 +80,7 @@ function ViewerPage() {
           </div>
         )}
 
-        {/* Control Dock - FIXED TO 5 COLUMNS */}
+        {/* Control Dock - FIXED TO 5 COLUMNS & SHIFTED DOWN */}
         <div className="control-dock">
            <div className="dock-grid">
               {tabs.map((tab, index) => (
@@ -181,10 +182,8 @@ function ViewerPage() {
           transition: all 0.2s ease;
           text-transform: uppercase;
           
-          /* RESTORED SHAPE: Tech-style angled cut on top-left */
+          /* SHAPE: Tech-style angled cut */
           clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%, 0 12px);
-          /* Optional: Add a border radius fallback if clip-path fails */
-          border-radius: 0; 
         }
         .dock-btn:hover { background: rgba(0, 0, 255, 0.2); border-color: var(--primary); }
         .dock-btn.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px rgba(0, 0, 255, 0.5); }
@@ -200,9 +199,8 @@ function ViewerPage() {
         /* === MOBILE FIXES (Max 768px) === */
         /* ========================================= */
         @media (max-width: 768px) {
-          
-          /* FIX 1: Move Info Card to TOP */
           .meta{ display: none; }
+          /* 1. INFO CARD: Keep at Top */
           .info-terminal-wrapper {
             position: absolute;
             top: 60px;
@@ -221,34 +219,34 @@ function ViewerPage() {
             padding: 10px 12px;
             border-left: 2px solid var(--primary);
           }
-          
           .info-terminal h3 { font-size: 0.9rem; }
           .info-terminal p { font-size: 0.75rem; line-height: 1.3; }
 
-          /* FIX 2: All buttons in ONE view (Grid Layout) */
+          /* 2. DOCK: Shifted Down & Compressed */
           .control-dock {
-            padding: 10px 10px 20px 10px;
-            background: rgba(0,0,0,0.8);
+            /* Reduced bottom padding to 5px (+ safe area) to shift buttons down */
+            padding: 10px 5px 5px 5px; 
+            padding-bottom: max(5px, env(safe-area-inset-bottom)); /* iOS Safe Area support */
+            background: rgba(0,0,0,0.85);
           }
 
           .dock-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr); 
-            gap: 4px; /* Small gap to keep buttons distinct */
+            gap: 4px;
             width: 100%;
           }
 
           .dock-btn {
-            padding: 12px 0; /* Taller touch targets */
+            padding: 12px 0; 
             font-size: 0.60rem; 
             text-align: center;
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            
-            /* IMPORTANT: Shape is PRESERVED here (inherits from desktop). */
-            /* We do NOT set clip-path: none */
+            /* Shape Preserved */
+            clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
           }
         }
       `}</style>
