@@ -10,16 +10,6 @@ function ViewerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Detect mobile for layout adjustments
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Fetch Model Data
   useEffect(() => {
     const shortId = window.location.pathname.split('/').pop();
     fetch(`${API}/api/models/${shortId}`)
@@ -69,7 +59,7 @@ function ViewerPage() {
           <div className="meta">ID: {model.shortId}</div>
         </div>
 
-        {/* Info Terminal - MOVED TO TOP AREA VIA CSS */}
+        {/* Info Terminal - TOP LEFT */}
         {activeTab !== 4 && (
           <div className="info-terminal-wrapper">
             <div className="info-terminal">
@@ -80,7 +70,7 @@ function ViewerPage() {
           </div>
         )}
 
-        {/* Control Dock - FIXED TO 5 COLUMNS & SHIFTED DOWN */}
+        {/* Control Dock - BOTTOM */}
         <div className="control-dock">
            <div className="dock-grid">
               {tabs.map((tab, index) => (
@@ -99,7 +89,7 @@ function ViewerPage() {
 
       {/* === CSS STYLES === */}
       <style>{`
-        /* --- GLOBAL VARIABLES --- */
+        /* --- GLOBAL --- */
         :root {
             --primary: #0000ff;
             --bg-dark: #050505;
@@ -109,80 +99,57 @@ function ViewerPage() {
         body { margin: 0; background: var(--bg-dark); overflow: hidden; font-family: 'Orbitron', sans-serif; }
         
         .hud-container { width: 100vw; height: 100vh; height: 100dvh; position: relative; }
-        
         .model-layer { width: 100%; height: 100%; position: absolute; z-index: 0; }
         .hud-layer { width: 100%; height: 100%; position: absolute; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between;}
-
-        /* --- LOADING / ERROR --- */
-        .loading-screen, .error-screen {
-            height: 100dvh; display: flex; justify-content: center; align-items: center;
-            background: var(--bg-dark); color: white; letter-spacing: 2px; font-size: 1.2rem;
-        }
-        .error-screen { color: #ff3333; }
 
         /* --- HEADER --- */
         .hud-header {
           padding: 15px 20px; 
           display: flex; justify-content: space-between; align-items: center;
-          color: white; letter-spacing: 1px; pointer-events: auto;
+          color: white; letter-spacing: 1px; 
+          /* CRITICAL FIX: Only children catch clicks, header background passes through */
+          pointer-events: none; 
           background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
           flex-shrink: 0;
           z-index: 20;
         }
+        .brand, .meta { pointer-events: auto; } /* Re-enable clicks on text */
+        
         .brand { font-size: 1.1rem; font-weight: 700; }
         .meta { font-size: 0.8rem; opacity: 0.7; color: var(--primary); font-family: monospace; }
 
+        /* --- LOADING / ERROR --- */
+        .loading-screen, .error-screen { height: 100dvh; display: flex; justify-content: center; align-items: center; background: var(--bg-dark); color: white; letter-spacing: 2px; }
+        .error-screen { color: #ff3333; }
+
         /* --- INFO TERMINAL --- */
         .info-terminal-wrapper {
-            position: absolute;
-            top: 25%; left: 5%;
-            pointer-events: none; 
+            position: absolute; top: 25%; left: 5%; pointer-events: none; 
         }
-
         .info-terminal {
-          width: 300px;
-          background: var(--glass);
+          width: 300px; background: var(--glass);
           backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-left: 3px solid var(--primary);
-          padding: 15px;
-          color: white;
-          pointer-events: auto; 
-          animation: fadePop 0.4s ease-out;
+          border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid var(--primary);
+          padding: 15px; color: white; pointer-events: auto; animation: fadePop 0.4s ease-out;
         }
-        
-        .info-terminal h3 { margin: 0 0 5px 0; font-size: 1rem; letter-spacing: 1px; color: #fff; text-transform: uppercase; }
+        .info-terminal h3 { margin: 0 0 5px 0; font-size: 1rem; color: #fff; text-transform: uppercase; }
         .info-terminal p { margin: 0; font-size: 0.85rem; line-height: 1.4; opacity: 0.9; min-height: 2.8em; color: #ddd; }
         .terminal-header { font-size: 0.65rem; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; font-weight: bold;}
         .blink { animation: blink 1s infinite; color: var(--primary); }
 
         /* --- CONTROL DOCK --- */
         .control-dock {
-          width: 100%;
-          padding: 15px 0 25px 0;
+          width: 100%; padding: 15px 0 25px 0;
           background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-          pointer-events: auto;
-          z-index: 20;
+          pointer-events: auto; z-index: 20;
         }
-
-        .dock-grid {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
+        .dock-grid { display: flex; justify-content: center; gap: 10px; }
+        
         .dock-btn {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid var(--border);
-          color: white;
-          padding: 10px 20px;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.8rem;
-          cursor: pointer;
-          transition: all 0.2s ease;
+          background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border);
+          color: white; padding: 10px 20px; font-family: 'Orbitron', sans-serif;
+          font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease;
           text-transform: uppercase;
-          
-          /* SHAPE: Tech-style angled cut */
           clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%, 0 12px);
         }
         .dock-btn:hover { background: rgba(0, 0, 255, 0.2); border-color: var(--primary); }
@@ -195,57 +162,34 @@ function ViewerPage() {
         @keyframes typing { from { max-height: 0; } to { max-height: 100px; } }
         @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--primary); } }
 
-        /* ========================================= */
         /* === MOBILE FIXES (Max 768px) === */
-        /* ========================================= */
         @media (max-width: 768px) {
-          .meta{ display: none; }
-          /* 1. INFO CARD: Keep at Top */
+          .meta { display: none; }
+          
+          /* 1. INFO CARD: TOP LEFT */
           .info-terminal-wrapper {
-            position: absolute;
-            top: 60px;
-            left: 0; 
-            width: 100%;
-            display: flex;
-            justify-content: flex-start;
-            padding: 0 15px;
-            box-sizing: border-box;
+            position: absolute; top: 60px; left: 0; width: 100%;
+            display: flex; justify-content: flex-start; padding: 0 15px; box-sizing: border-box;
           }
-
           .info-terminal {
-            width: 100%;
-            max-width: 280px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px 12px;
-            border-left: 2px solid var(--primary);
+            width: 100%; max-width: 280px; background: rgba(0, 0, 0, 0.6);
+            padding: 10px 12px; border-left: 2px solid var(--primary);
           }
           .info-terminal h3 { font-size: 0.9rem; }
           .info-terminal p { font-size: 0.75rem; line-height: 1.3; }
 
-          /* 2. DOCK: Shifted Down & Compressed */
+          /* 2. DOCK: COMPACT GRID */
           .control-dock {
-            /* Reduced bottom padding to 5px (+ safe area) to shift buttons down */
             padding: 10px 5px 5px 5px; 
-            padding-bottom: max(5px, env(safe-area-inset-bottom)); /* iOS Safe Area support */
+            padding-bottom: max(5px, env(safe-area-inset-bottom));
             background: rgba(0,0,0,0.85);
           }
-
           .dock-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 4px;
-            width: 100%;
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%;
           }
-
           .dock-btn {
-            padding: 12px 0; 
-            font-size: 0.60rem; 
-            text-align: center;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Shape Preserved */
+            padding: 12px 0; font-size: 0.60rem; text-align: center;
+            width: 100%; display: flex; justify-content: center; align-items: center;
             clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
           }
         }

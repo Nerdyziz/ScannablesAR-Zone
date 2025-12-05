@@ -3,7 +3,6 @@ import '@google/model-viewer';
 
 export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions }) {
   const [progress, setProgress] = useState(0);
-  // Ref to access the actual DOM element of the viewer
   const viewerRef = useRef(null);
 
   // 1. Progress Bar Logic
@@ -16,33 +15,15 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
     }
   }, []);
 
-  // 2. HARD RESET LOGIC (Smoothed)
+  // 2. Interaction Logic
   useEffect(() => {
     const mv = viewerRef.current;
     if (!mv) return;
-
-    // If we are exiting "Explore Mode" (entering a Fixed View like Front/Back)
     if (!enableInteractions && cameraOrbit) {
-      
-      // A. Reset Panning (Center the model)
       mv.cameraTarget = 'auto auto auto';
-      
-      // B. Reset FOV (Fixes the "Zoom Scale" issue)
-      // Pinch-zooming changes FOV; we must reset it to 'auto' to get back to default zoom.
       mv.fieldOfView = 'auto';
-      
-      // C. Reset Rotation Offset
-      // This ensures "0deg" is truly Front.
-      if (mv.resetTurntableRotation) {
-        mv.resetTurntableRotation();
-      }
-      
-      // D. Apply the Target Angle
+      if (mv.resetTurntableRotation) mv.resetTurntableRotation();
       mv.cameraOrbit = cameraOrbit;
-      
-      // E. REMOVED jumpCameraToGoal() 
-      // By removing this line, the camera will now GLIDE to the new position 
-      // instead of snapping instantly.
     }
   }, [cameraOrbit, enableInteractions]);
 
@@ -50,8 +31,36 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      {/* Sci-Fi Font Import */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');`}</style>
+      {/* Sci-Fi Font & Dynamic AR Button Styles */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+        
+        /* Default Desktop AR Button */
+        .ar-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            background: white;
+            color: black;
+            z-index: 100;
+        }
+
+        /* Mobile Adjustment: Lift it up so it doesn't overlap the dock */
+        @media (max-width: 768px) {
+            .ar-button {
+                bottom: 110px; /* Clears the bottom buttons */
+                right: 15px;
+                padding: 8px 16px;
+                font-size: 0.8rem;
+                opacity: 0.9;
+            }
+        }
+      `}</style>
 
       <model-viewer
         ref={viewerRef}
@@ -59,32 +68,15 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
         alt="A 3D model"
         ar 
         ar-modes="webxr scene-viewer quick-look"
-        
-        // === INTERACTION ===
         camera-controls={enableInteractions}
-        
-        // Auto-Rotate: Enabled in Explore mode
         auto-rotate={enableInteractions}
         auto-rotate-delay="0"
-        rotation-per-second="-60deg" // Gentle spin
-        
-        // === ORBIT INPUT ===
-        // Interactive: undefined (Let user/auto control it)
-        // Fixed: cameraOrbit (Target angle)
+        rotation-per-second="-60deg"
         camera-orbit={enableInteractions ? undefined : cameraOrbit}
-        
-        // Always center
         camera-target="auto auto auto"
-        
-        // === MOVEMENT SPEED ===
-        // 200ms decay makes the "Glide" logic work. 
-        // It creates the smooth transition you wanted.
         interpolation-decay="200"
-        
-        // Lock manual controls when in "View" mode
-        disable-pan= 'true'
+        disable-pan='true'
         disable-zoom={!enableInteractions}
-        
         shadow-intensity="1"
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
       >
@@ -95,11 +87,10 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
              display: progress >= 100 ? 'none' : 'block', fontFamily: 'Orbitron, sans-serif'
         }}>Loading... {Math.round(progress)}%</div>
         
-        {/* AR Button */}
-        <button slot="ar-button" style={{
-          position:'absolute', bottom:'20px', right:'20px', padding:'10px 20px', 
-          borderRadius:'20px', border:'none', fontFamily: 'Orbitron, sans-serif', fontWeight: 'bold'
-        }}>📱 AR View</button>
+        {/* AR Button with Class for Responsive Positioning */}
+        <button slot="ar-button" className="ar-button">
+          📱 AR View
+        </button>
       </model-viewer>
     </div>
   );
