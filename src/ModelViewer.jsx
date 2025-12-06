@@ -68,13 +68,19 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
         alt="A 3D model"
         ar 
         ar-modes="webxr scene-viewer quick-look"
+        
+        // === CRITICAL FIX FOR SMOOTHNESS ===
+        // When user is interacting: 0 decay (instant response).
+        // When tabs change: 200 decay (smooth glide).
+        interpolation-decay={enableInteractions ? "0" : "200"}
+
         camera-controls={enableInteractions}
         auto-rotate={enableInteractions}
         auto-rotate-delay="0"
         rotation-per-second="-60deg"
         camera-orbit={enableInteractions ? undefined : cameraOrbit}
         camera-target="auto auto auto"
-        interpolation-decay="200"
+        
         disable-pan='true'
         disable-zoom={!enableInteractions}
         shadow-intensity="1"
