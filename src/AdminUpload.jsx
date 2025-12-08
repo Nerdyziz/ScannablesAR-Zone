@@ -1,60 +1,44 @@
-// frontend/src/AdminUpload.jsx
 import React, { useEffect, useState } from 'react';
-import './AdminUpload.css';
+import './AdminUpload.css'; // Ensure this matches basic styles
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function AdminUpload() {
-  const [file, setFile] = useState(null);
   const [adminKey, setAdminKey] = useState('');
-  const [message, setMessage] = useState('');
   const [models, setModels] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [lastCreatedLink, setLastCreatedLink] = useState('');
+  
+  // Upload States
+  const [modelFile, setModelFile] = useState(null);
+  const [bgFile, setBgFile] = useState(null);
+  const [name, setName] = useState('');
+  const [qty, setQty] = useState(100);
+  const [sold, setSold] = useState(0);
+  const [message, setMessage] = useState('');
 
-  // --- 4 CORNERS STATE ---
-  const [infoTL, setInfoTL] = useState('');
-  const [infoTR, setInfoTR] = useState('');
-  const [infoBL, setInfoBL] = useState('');
-  const [infoBR, setInfoBR] = useState('');
+  // Editing State
+  const [editId, setEditId] = useState(null);
+  const [editQty, setEditQty] = useState(0);
+  const [editSold, setEditSold] = useState(0);
 
-  useEffect(() => {
-    fetchModels();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => { fetchModels(); }, []);
 
   async function fetchModels() {
-    try {
-      setLoading(true);
-      const res = await fetch(`${API}/api/models`);
-      if (!res.ok) throw new Error('Failed to fetch models');
-      const data = await res.json();
-      setModels(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('fetchModels error', err);
-      setMessage('Failed to load models');
-    } finally {
-      setLoading(false);
-    }
+    const res = await fetch(`${API}/api/models`);
+    const data = await res.json();
+    setModels(Array.isArray(data) ? data : []);
   }
 
+  // --- CREATE NEW ---
   async function handleUpload(e) {
     e.preventDefault();
-    setMessage('');
-    setLastCreatedLink('');
+    if (!modelFile || !adminKey || !name) return setMessage('Missing required fields');
 
-    if (!file) return setMessage('Choose a file first');
-    if (!adminKey) return setMessage('Enter admin key');
-
-    setMessage('Uploading...');
     const fd = new FormData();
-    fd.append('modelFile', file);
-    
-    // Append Text Data
-    fd.append('infoTL', infoTL);
-    fd.append('infoTR', infoTR);
-    fd.append('infoBL', infoBL);
-    fd.append('infoBR', infoBR);
+    fd.append('modelFile', modelFile);
+    if (bgFile) fd.append('bgFile', bgFile);
+    fd.append('name', name);
+    fd.append('qty', qty);
+    fd.append('sold', sold);
 
     try {
       const res = await fetch(`${API}/api/upload`, {
@@ -62,186 +46,103 @@ export default function AdminUpload() {
         headers: { 'x-api-key': adminKey },
         body: fd
       });
-
-      const text = await res.text();
-      let payload;
-      try { payload = JSON.parse(text); } catch { payload = { raw: text }; }
-
-      if (!res.ok) {
-        const err = payload.error || payload.message || payload.raw || `HTTP ${res.status}`;
-        setMessage(`Upload failed: ${err}`);
-        return;
-      }
-
-      const viewLink =
-        payload.viewLink ||
-        (payload.model && payload.model.viewLink) ||
-        (payload.model && payload.model.shortId && `${window.location.origin}/view/${payload.model.shortId}`) ||
-        (payload.model && payload.model._id && `${window.location.origin}/view/${payload.model._id}`) ||
-        null;
-
-      if (payload.model) {
-        setModels(prev => [payload.model, ...prev.filter(x => x._id !== payload.model._id)]);
+      const data = await res.json();
+      if(data.success) {
+        setMessage('Uploaded!');
+        fetchModels();
+        // Reset form
+        setName(''); setModelFile(null); setBgFile(null);
       } else {
-        await fetchModels();
+        setMessage(data.error);
       }
-
-      if (viewLink) {
-        setLastCreatedLink(viewLink);
-        setMessage('Upload successful — link created below.');
-        setFile(null);
-        setInfoTL(''); setInfoTR(''); setInfoBL(''); setInfoBR('');
-        return;
-      }
-
-      setMessage('Upload succeeded but server did not return a link. Refreshed list.');
-    } catch (err) {
-      console.error('Upload error:', err);
-      setMessage('Network/server error. Check backend logs and CORS.');
-    }
+    } catch (e) { setMessage('Error uploading'); }
   }
 
-  async function handleDelete(shortId) {
-    if (!adminKey) return setMessage('Enter admin key to delete');
-    if (!confirm('Delete this model?')) return;
+  // --- UPDATE EXISTING ---
+  async function handleUpdate(shortId) {
+    if(!adminKey) return alert('Enter Admin Key top left');
     try {
       const res = await fetch(`${API}/api/models/${shortId}`, {
-        method: 'DELETE',
-        headers: { 'x-api-key': adminKey }
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-api-key': adminKey 
+        },
+        body: JSON.stringify({ qty: editQty, sold: editSold })
       });
-      if (!res.ok) {
-        const p = await res.json().catch(() => ({}));
-        setMessage(p.error || 'Delete failed');
-        return;
+      if(res.ok) {
+        setEditId(null);
+        fetchModels();
+      } else {
+        alert('Update failed');
       }
-      setMessage('Deleted');
-      setModels(prev => prev.filter(m => m.shortId !== shortId));
-      if (lastCreatedLink && lastCreatedLink.includes(shortId)) setLastCreatedLink('');
-    } catch (e) {
-      console.error('Delete error', e);
-      setMessage('Delete failed');
-    }
-  }
-
-  function copyToClipboard(text) {
-    navigator.clipboard?.writeText(text)
-      .then(() => setMessage('Link copied'))
-      .catch(() => setMessage('Copy failed'));
+    } catch(e) { console.error(e); }
   }
 
   return (
-    <div className="admin-wrap">
-      {/* --- LEFT SIDE: UPLOAD CARD --- */}
-      <div className="admin-card" style={{ minWidth: '350px' }}>
-        <h2>Admin — Upload 3D Model</h2>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label className="field" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Admin Key
-          </label>
-          <input
-            type="password"
-            className="field-input"
-            style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
-            value={adminKey}
-            onChange={e => setAdminKey(e.target.value)}
-            placeholder="Enter admin token"
-          />
-        </div>
-
-        {lastCreatedLink && (
-          <div className="created-link" style={{ wordBreak: 'break-all', marginBottom: '15px' }}>
-            <strong>Link:</strong> <a href={lastCreatedLink} target="_blank" rel="noreferrer">{lastCreatedLink}</a>
-            <div style={{ marginTop: '5px' }}>
-              <button className="btn small" onClick={() => copyToClipboard(lastCreatedLink)}>Copy</button>
-            </div>
-          </div>
-        )}
-
-        {/* --- FORM WITH CLEAN VERTICAL LAYOUT --- */}
-        <form onSubmit={handleUpload} className="upload-form" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          
-          {/* 1. File Input */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', opacity: 0.9 }}>1. Select Model</label>
-            <input
-              type="file"
-              accept=".glb,.gltf"
-              onChange={e => {
-                setFile(e.target.files[0]);
-                setMessage('');
-              }}
-              style={{ width: '100%' }}
-            />
-          </div>
-          
-          {/* 2. Text Inputs Grid */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', opacity: 0.9 }}>2. Corner Details (Optional)</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-               <input 
-                 placeholder="Top Left" 
-                 value={infoTL} onChange={e=>setInfoTL(e.target.value)} 
-                 className="field-input"
-                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
-               />
-               <input 
-                 placeholder="Top Right" 
-                 value={infoTR} onChange={e=>setInfoTR(e.target.value)} 
-                 className="field-input"
-                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
-               />
-               <input 
-                 placeholder="Bottom Left" 
-                 value={infoBL} onChange={e=>setInfoBL(e.target.value)} 
-                 className="field-input"
-                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
-               />
-               <input 
-                 placeholder="Bottom Right" 
-                 value={infoBR} onChange={e=>setInfoBR(e.target.value)} 
-                 className="field-input"
-                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px' }}
-               />
-            </div>
-          </div>
-
-          <button className="btn" type="submit" style={{ width: '100%', padding: '10px' }}>Upload Model</button>
-        </form>
-
-        <p className="message" style={{ marginTop: '15px' }}>{message}</p>
+    <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto', color: '#fff', background: '#111' }}>
+      <h1>Admin Dashboard</h1>
+      
+      <div style={{ marginBottom: 20 }}>
+        <input 
+          type="password" 
+          placeholder="Admin Key" 
+          value={adminKey} 
+          onChange={e=>setAdminKey(e.target.value)}
+          style={{ padding: 10, borderRadius: 5, border: 'none' }}
+        />
       </div>
 
-      {/* --- RIGHT SIDE: MODELS GRID --- */}
-      <div className="models-grid">
-        <h3>Your models</h3>
-        {loading && <p>Loading...</p>}
-        {!loading && models.length === 0 && <p>No models yet</p>}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
+        
+        {/* LEFT: UPLOAD FORM */}
+        <div style={{ background: '#222', padding: 20, borderRadius: 10 }}>
+          <h2>New Drop</h2>
+          <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <input type="text" placeholder="Product Name" value={name} onChange={e=>setName(e.target.value)} required style={{padding:8}} />
+            
+            <label>3D Model (.glb/.gltf)</label>
+            <input type="file" accept=".glb,.gltf" onChange={e=>setModelFile(e.target.files[0])} required />
+            
+            <label>Background Image (Optional)</label>
+            <input type="file" accept="image/*" onChange={e=>setBgFile(e.target.files[0])} />
 
-        <div className="cards">
-          {models.map(m => {
-            const viewUrl = `${window.location.origin}/view/${m.shortId}`;
-            return (
-              <div className="model-card" key={m._id}>
-                <div className="card-top">
-                  <div className="name" title={m.name}>{m.name}</div>
-                  <div className="meta">👁 {m.views || 0}</div>
-                </div>
+            <div style={{display:'flex', gap:10}}>
+              <input type="number" placeholder="Total Qty" value={qty} onChange={e=>setQty(e.target.value)} style={{padding:8, width:'50%'}} />
+              <input type="number" placeholder="Sold Count" value={sold} onChange={e=>setSold(e.target.value)} style={{padding:8, width:'50%'}} />
+            </div>
 
-                <div className="card-body">
-                  <a href={viewUrl} target="_blank" rel="noreferrer">
-                    <div className="link">{viewUrl}</div>
-                  </a>
-                </div>
+            <button type="submit" style={{ padding: 10, background: 'blue', color: 'white', border: 'none', cursor: 'pointer' }}>UPLOAD DROP</button>
+          </form>
+          <p>{message}</p>
+        </div>
 
-                <div className="card-actions">
-                  <button className="btn small" onClick={() => copyToClipboard(viewUrl)}>Copy Link</button>
-                  <a className="btn small ghost" href={m.url} target="_blank" rel="noreferrer">Raw</a>
-                  <button className="btn small danger" onClick={() => handleDelete(m.shortId)}>Delete</button>
-                </div>
+        {/* RIGHT: LIST */}
+        <div>
+          <h2>Active Drops</h2>
+          {models.map(m => (
+            <div key={m._id} style={{ border: '1px solid #444', padding: 10, marginBottom: 10, borderRadius: 5 }}>
+              <div style={{display:'flex', justifyContent:'space-between'}}>
+                <strong>{m.name}</strong>
+                <a href={`/view/${m.shortId}`} target="_blank" style={{color:'lightblue'}}>View</a>
               </div>
-            );
-          })}
+              
+              {editId === m.shortId ? (
+                <div style={{ marginTop: 10, background:'#333', padding:5 }}>
+                   Qty: <input type="number" defaultValue={m.qty} onChange={e=>setEditQty(e.target.value)} style={{width:50}} />
+                   Sold: <input type="number" defaultValue={m.sold} onChange={e=>setEditSold(e.target.value)} style={{width:50}} />
+                   <button onClick={() => handleUpdate(m.shortId)} style={{marginLeft:5}}>Save</button>
+                   <button onClick={() => setEditId(null)} style={{marginLeft:5}}>Cancel</button>
+                </div>
+              ) : (
+                <div style={{ fontSize: '0.8rem', color: '#aaa', marginTop: 5 }}>
+                   Qty: {m.qty} | Sold: {m.sold} | Views: {m.views} | Likes: {m.likes || 0}
+                   <br/>
+                   <button onClick={() => { setEditId(m.shortId); setEditQty(m.qty); setEditSold(m.sold); }} style={{marginTop:5, fontSize:'0.7rem'}}>Edit Stats</button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>
