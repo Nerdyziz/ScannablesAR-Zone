@@ -98,17 +98,17 @@ export default function ViewerPage() {
       </div>
 
       {/* 3. Footer Stats */}
-      <div className="stats-footer">
-        <div className="stat-item">
-          <span className="stat-icon">👥</span> {model.sold || 0} SOLD
-        </div>
-        <div className="stat-item">
-          <span className="stat-icon">▦</span> {model.qty || 0} ITEMS
-        </div>
-        <div className="stat-item">
-          <span className="stat-icon">👁</span> {model.views} VIEWS
-        </div>
-      </div>
+     <div className="stats-footer">
+  <div className="stat-item">
+    <strong>{model.sold || 0}</strong> sold
+  </div>
+  <div className="stat-item">
+    <strong>{model.qty || 0}</strong> items
+  </div>
+  <div className="stat-item">
+    <strong>{model.views}</strong> views
+  </div>
+</div>
 
     </div>
   );

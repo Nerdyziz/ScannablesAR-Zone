@@ -38,7 +38,7 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
         /* Default Desktop AR Button */
         .ar-button {
             position: absolute;
-            bottom: 20px;
+            bottom: 15px; /* Pushed down */
             right: 20px;
             padding: 10px 20px;
             border-radius: 20px;
@@ -48,12 +48,13 @@ export default function ModelViewer({ modelUrl, cameraOrbit, enableInteractions 
             background: white;
             color: black;
             z-index: 100;
+            cursor: pointer;
         }
 
         /* Mobile Adjustment: Lift it up so it doesn't overlap the dock */
         @media (max-width: 768px) {
             .ar-button {
-                bottom: 100px; /* Clears the bottom buttons */
+                bottom: 40px; /* NEW POSITION: Lower than before */
                 right: 15px;
                 padding: 8px 16px;
                 font-size: 0.8rem;

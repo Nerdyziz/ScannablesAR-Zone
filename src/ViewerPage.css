@@ -1,9 +1,11 @@
-/* IMPORT FUTURISTIC FONT */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+/* IMPORT MINIMAL FONT (INTER) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
 :root {
   --bg-dark: #000000;
   --text-white: #ffffff;
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; /* MINIMAL FONT */
+  --accent-color: #333333;
 }
 
 /* GLOBAL RESET */
@@ -15,13 +17,14 @@ html, body {
   background-color: var(--bg-dark);
   color: var(--text-white);
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased; /* Makes text sharper */
 }
 
 .viewer-container {
   display: flex;
   flex-direction: column;
-  height: 100dvh; /* Dynamic viewport height */
+  height: 100dvh;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
@@ -31,61 +34,50 @@ html, body {
 /* --- HEADER SECTION --- */
 .header-section {
   flex: 0 0 auto;
-  margin-bottom: 25px;
+  margin-bottom: 15px;
 }
 
 .brand-tag {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 2px;
-  color: red;
-  font-weight: 700;
-  margin-bottom: 10px;
-  opacity: 0.9;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #ff0000; /* Grey for minimal look */
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
 .product-title {
-  font-family: 'Orbitron', sans-serif;
   font-size: 1.8rem;
-  font-weight: 800;
+  font-weight: 800; /* Bold but clean */
   line-height: 1.1;
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: -0.5px; /* Tighter spacing for modern look */
 }
 
 /* --- VISUAL CARD --- */
 .visual-card {
   position: relative;
-  flex: 1; /* Fill remaining space */
+  flex: 1;
   width: 100%;
-  background-color: #1a1a1a;
-  border-radius: 16px;
+  background-color: #111;
+  border-radius: 12px; /* Slightly softer corners */
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   margin-bottom: 20px;
 }
 
-/* Background Image */
-.bg-image {
-  position: absolute;
-  top: 60px;
-  left: 0;
-  width: 100%;
-  height: calc(100% - 60px);
-  object-fit: cover;
-  z-index: 0;
-  opacity: 0.8;
-}
-
-/* Model Layer */
-.model-layer {
+/* Background & Model Layers */
+.bg-image, .model-layer {
   position: absolute;
   top: 60px;
   left: 0;
   width: 100%;
   height: calc(100% - 60px);
   z-index: 10;
+}
+.bg-image { 
+  object-fit: cover; 
+  z-index: 0; 
+  opacity: 0.8; 
 }
 
 /* --- CARD OVERLAY (Top Strip) --- */
@@ -100,38 +92,35 @@ html, body {
   justify-content: space-between;
   align-items: center;
   z-index: 20;
-  background: #1a1a1a;
+  background: #111; /* Matches card bg */
 }
 
+/* Logo Image Container */
 .logo-icon {
-  /* Set fixed height for the container, width auto adjusts */
-  height: 30px; 
+  height: 24px; /* Slightly smaller for minimalism */
   display: flex;
   align-items: center;
 }
-
 .logo-icon img {
-  /* Force image to fit the container height */
   height: 100%;
   width: auto;
-  object-fit: contain; /* Ensures logo doesn't stretch */
-  
-  /* Optional: Add a drop shadow to the image itself if needed for contrast */
-  /* filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); */
+  object-fit: contain;
 }
+
 .action-group {
   display: flex;
   align-items: center;
 }
 
 .icon-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 30px; /* Pill shape */
+  padding: 6px 16px;
   color: white;
-  font-size: 1rem;
-  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-main);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -139,10 +128,11 @@ html, body {
   transition: all 0.2s ease;
 }
 
-.icon-btn:hover { background: rgba(255,255,255,0.2); }
+.icon-btn:hover { background: rgba(255,255,255,0.1); }
 .icon-btn.active {
-  background: rgba(255, 0, 0, 0.15);
-  border-color: rgba(255, 0, 0, 0.4);
+  background: white;
+  color: black; /* Invert colors for active state (Minimal style) */
+  border-color: white;
 }
 
 /* --- FOOTER --- */
@@ -151,63 +141,38 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 5px;
+  padding: 15px 5px;
   border-top: 1px solid #222;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 0.85rem;
+  font-weight: 500;
+  color: #999; /* Softer text color */
+}
+.stat-item strong {
+  color: white;
   font-weight: 600;
-  color: #ddd;
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 0.5px;
 }
 
-.stat-icon { font-size: 1rem;
-}
+.stat-icon { font-size: 1rem; color: #555; }
 
 .loading, .error {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  color: white;
-  font-family: 'Orbitron', sans-serif;
+  color: #666;
+  font-weight: 500;
 }
 
-/* === MOBILE OPTIMIZATIONS === */
+/* === MOBILE TWEAKS === */
 @media (max-width: 768px) {
-  /* Shrink Product Title */
-  .product-title {
-    font-size: 1.4rem; 
-  }
-  
-  /* Shrink Header Tag */
-  .brand-tag {
-    font-size: 0.65rem;
-  }
-
-  /* Shrink Footer Stats */
-  .stat-item {
-    font-size: 0.7rem;
-    gap: 4px; /* Tighter gap */
-  }
-
-  /* Shrink Buttons */
-  .icon-btn {
-    font-size: 0.85rem;
-    padding: 5px 12px;
-  }
-  
-  .logo-icon {
-    font-size: 1.3rem;
-  }
-  
-  /* Reduce padding slightly on mobile container */
-  .viewer-container {
-    padding: 15px; 
-  }
+  .product-title { font-size: 1.5rem; }
+  .brand-tag { font-size: 0.65rem; }
+  .viewer-container { padding: 16px; }
+  .stat-item { font-size: 0.75rem; }
 }
